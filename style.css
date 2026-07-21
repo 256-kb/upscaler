@@ -199,3 +199,35 @@ main {
 
 
 }
+
+.console {
+
+    background: black;
+    color: white;
+
+    font-family: monospace;
+
+    padding: 15px;
+
+    margin-top: 15px;
+
+    border-radius: 8px;
+
+    height: 200px;
+
+    overflow-y: auto;
+
+    text-align: left;
+
+}
+
+
+/* Inverse en mode sombre */
+
+body.dark .console {
+
+    background: white;
+
+    color: black;
+
+}
