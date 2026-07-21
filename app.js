@@ -1,168 +1,129 @@
+// ================================
+// UPSCALER IA - APP.JS
+// PARTIE 1/8
+// ================================
+
+
+// Chargement ONNX Runtime Web
+
 ort.env.wasm.wasmPaths =
 "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/";
 
 
-let session = null;
-let originalImage = null;
+// Active les optimisations
 
+ort.env.graphOptimizationLevel = "all";
+
+
+// ================================
+// MODELES
+// ================================
 
 const MODELS = {
 
-    quality: {
-        onnx:
-        "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_quality.onnx",
-
-        data:
-        "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_quality.data"
+    speed: {
+        name: "RealESR-General x4v3",
+        url:
+        "https://github.com/256-kb/upscaler/releases/download/Ai/realesr-general-x4v3.onnx"
     },
 
 
-    speed: {
-        onnx:
-        "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_speed.onnx",
-
-        data:
-        "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_speed.data"
+    quality: {
+        name: "RealESRGAN x4plus",
+        url:
+        "https://github.com/256-kb/upscaler/releases/download/Ai/realesrgan-x4plus.onnx"
     }
 
 };
 
 
 
-const imageInput = document.getElementById("imageInput");
-const originalPreview = document.getElementById("originalPreview");
-const originalInfo = document.getElementById("originalInfo");
-
-const modelSelect = document.getElementById("modelSelect");
-const runButton = document.getElementById("runButton");
-
-const progressBar = document.getElementById("progressBar");
-const status = document.getElementById("status");
-
-const themeButton = document.getElementById("themeButton");
+// ================================
+// VARIABLES GLOBALES
+// ================================
 
 
+let session = null;
 
+let currentModel = null;
 
-themeButton.onclick = () => {
+let originalImage = null;
 
-    document.body.classList.toggle("dark");
+let originalBitmap = null;
 
-};
+let upscaledImage = null;
+
+let isProcessing = false;
 
 
 
+// ================================
+// ELEMENTS HTML
+// ================================
 
 
-imageInput.onchange = () => {
-
-    const file = imageInput.files[0];
-
-    if(!file) return;
+const imageInput =
+document.getElementById("imageInput");
 
 
-    const url = URL.createObjectURL(file);
+const originalPreview =
+document.getElementById("originalPreview");
 
 
-    originalPreview.src = url;
+const resultPreview =
+document.getElementById("resultPreview");
 
 
-    originalImage = new Image();
-
-    originalImage.src = url;
-
+const runButton =
+document.getElementById("runButton");
 
 
-    originalImage.onload = () => {
+const saveButton =
+document.getElementById("saveButton");
 
-        originalInfo.textContent =
-        `${originalImage.width} × ${originalImage.height}px`;
+
+const modelSelect =
+document.getElementById("modelSelect");
+
+
+const scaleSelect =
+document.getElementById("scaleSelect");
+
+
+const progressBar =
+document.getElementById("progressBar");
+
+
+const statusText =
+document.getElementById("status");
+
+
+
+const originalInfo =
+document.getElementById("originalInfo");
+
+
+const resultInfo =
+document.getElementById("resultInfo");
+
+
+
+// ================================
+// THEME
+// ================================
+
+
+const themeButton =
+document.getElementById("themeButton");
+
+
+if(themeButton){
+
+    themeButton.onclick = () => {
+
+        document.body.classList.toggle("dark");
 
     };
-
-};
-
-
-
-
-
-
-
-async function loadModel(type){
-
-
-    const model = MODELS[type];
-
-
-    status.textContent =
-    "Téléchargement du modèle...";
-
-
-    progressBar.value = 20;
-
-
-
-    try {
-
-
-        session = await ort.InferenceSession.create(
-
-            model.onnx,
-
-            {
-
-                executionProviders:[
-
-                    "wasm"
-
-                ],
-
-
-                externalData:[
-
-                    {
-
-                        path: model.data
-
-                    }
-
-                ]
-
-            }
-
-        );
-
-
-
-        progressBar.value = 100;
-
-
-        status.textContent =
-        "Modèle chargé";
-
-
-        console.log(session);
-
-
-        return session;
-
-
-    }
-
-
-    catch(error){
-
-
-        console.error(error);
-
-
-        status.textContent =
-        "Erreur chargement modèle";
-
-
-        throw error;
-
-    }
 
 }
 
@@ -170,46 +131,56 @@ async function loadModel(type){
 
 
 
+// ================================
+// CHARGEMENT IMAGE
+// ================================
 
 
-runButton.onclick = async()=>{
+imageInput.addEventListener(
+"change",
+async function(event){
 
 
-    if(!originalImage){
+    const file =
+    event.target.files[0];
 
-        alert("Choisis une image");
 
+    if(!file)
         return;
 
-    }
+
+
+    originalImage =
+    await createImageBitmap(file);
 
 
 
-    try{
+    originalBitmap =
+    originalImage;
 
 
-        await loadModel(
-            modelSelect.value
-        );
+
+    originalPreview.src =
+    URL.createObjectURL(file);
 
 
-        alert(
-        "Le modèle est chargé correctement."
-        );
+
+    originalInfo.textContent =
+    `${originalImage.width} × ${originalImage.height}px`;
 
 
-    }
+
+    resultPreview.src = "";
 
 
-    catch(error){
+
+    resultInfo.textContent =
+    "";
 
 
-        alert(
-        "Erreur : " + error.message
-        );
+
+    statusText.textContent =
+    "Image chargée";
 
 
-    }
-
-
-};
+});
