@@ -285,14 +285,11 @@ runButton.addEventListener(
             model:
             modelSelect.value,
 
-            image:
-            originalBitmap
+            image: originalBitmap,
+            scale: Number(scaleSelect.value)
 
         },
 
-        [
-            originalBitmap
-        ]
 
     );
 
