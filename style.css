@@ -352,7 +352,7 @@ body.dark .console {
 
     width:3px;
 
-    background:white;
+    background:currentColor;
 
     z-index:5;
 
