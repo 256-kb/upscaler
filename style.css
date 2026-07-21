@@ -269,7 +269,7 @@ body.dark .console {
 ===================== */
 
 
-#compareBox {
+#compareBox{
 
     position:relative;
 
@@ -279,22 +279,26 @@ body.dark .console {
 
     aspect-ratio:16/9;
 
+    margin:auto;
+
     overflow:hidden;
 
     border:2px solid #777;
 
-    border-radius:15px;
+    border-radius:12px;
 
-    margin:auto;
+    background:#111;
 
 }
 
 
 
 #compareBefore,
-#compareAfter {
+#compareAfter{
 
     position:absolute;
+
+    inset:0;
 
     width:100%;
 
@@ -302,9 +306,7 @@ body.dark .console {
 
     object-fit:contain;
 
-    top:0;
-
-    left:0;
+    object-position:center center;
 
 }
 
