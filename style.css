@@ -1,13 +1,13 @@
 * {
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 
 body {
     margin: 0;
     padding: 20px;
-    background: #f5f5f5;
+    background: #f2f2f2;
     color: #111;
     transition: 0.3s;
 }
@@ -15,94 +15,187 @@ body {
 
 body.dark {
     background: #111;
-    color: white;
+    color: #eee;
 }
+
 
 
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #999;
+
+    border-bottom: 1px solid #777;
     padding-bottom: 15px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 
+
 h1 {
+    font-size: 28px;
     margin: 0;
 }
 
 
-button,
-select,
-input {
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #777;
-    background: transparent;
-    color: inherit;
+
+main {
+    max-width: 900px;
+    margin: auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
+
+
+
+
+.card {
+
+    border: 1px solid #888;
+    padding: 20px;
+
+    background: transparent;
+
+}
+
+
+
+
+h2 {
+
+    margin-top: 0;
+
+}
+
+
+
+input,
+select,
+button {
+
+
+    width: 100%;
+
+    padding: 12px;
+
+    margin-top: 10px;
+
+    font-size: 16px;
+
+
+    background: transparent;
+
+    color: inherit;
+
+    border: 1px solid #777;
+
+}
+
 
 
 button {
+
     cursor: pointer;
+
+    margin-top: 20px;
+
 }
+
 
 
 button:hover {
+
     background: #ddd;
+
 }
+
 
 
 .dark button:hover {
+
     background: #333;
+
 }
 
 
-main {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
 
 
-section {
-    border: 1px solid #888;
-    padding: 15px;
-}
+.imageBox {
 
+    width: 100%;
 
-img {
-    max-width: 100%;
+    min-height: 150px;
+
     margin-top: 15px;
-    border: 1px solid #555;
+
+    border: 1px solid #777;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
 }
+
+
+
+.imageBox img {
+
+    max-width: 100%;
+
+    max-height: 500px;
+
+    object-fit: contain;
+
+}
+
+
 
 
 progress {
+
     width: 100%;
-    height: 20px;
+
+    height: 25px;
+
     margin-top: 15px;
+
 }
 
 
-#result {
-    display: block;
+
+
+#status {
+
+    text-align: center;
+
+    font-size: 14px;
+
 }
 
 
-#themeBtn {
-    width: 45px;
-    height: 40px;
+
+
+@media (min-width:700px){
+
+
+main {
+
+    display:grid;
+
+    grid-template-columns: repeat(2,1fr);
+
 }
 
 
-@media (min-width: 800px) {
+.card:last-child {
 
-    main {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-    }
+    grid-column: span 2;
+
+}
+
 
 }
