@@ -5,47 +5,65 @@
 
 
 body {
-    margin: 0;
-    padding: 20px;
-    background: #f2f2f2;
-    color: #111;
-    transition: 0.3s;
+
+    margin:0;
+    padding:20px;
+
+    background:#f2f2f2;
+    color:#111;
+
+    transition:0.3s;
+
 }
+
 
 
 body.dark {
-    background: #111;
-    color: #eee;
+
+    background:#111;
+    color:#eee;
+
 }
+
 
 
 
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 
-    border-bottom: 1px solid #777;
-    padding-bottom: 15px;
-    margin-bottom: 25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    border-bottom:1px solid #777;
+
+    padding-bottom:15px;
+    margin-bottom:25px;
+
 }
 
 
 
 h1 {
-    font-size: 28px;
-    margin: 0;
+
+    font-size:28px;
+    margin:0;
+
 }
 
 
 
 main {
-    max-width: 900px;
-    margin: auto;
 
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    max-width:900px;
+
+    margin:auto;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:20px;
+
 }
 
 
@@ -53,10 +71,13 @@ main {
 
 .card {
 
-    border: 1px solid #888;
-    padding: 20px;
+    border:1px solid #888;
 
-    background: transparent;
+    padding:20px;
+
+    border-radius:10px;
+
+    background:transparent;
 
 }
 
@@ -65,9 +86,10 @@ main {
 
 h2 {
 
-    margin-top: 0;
+    margin-top:0;
 
 }
+
 
 
 
@@ -76,46 +98,50 @@ select,
 button {
 
 
-    width: 100%;
+    width:100%;
 
-    padding: 12px;
+    padding:12px;
 
-    margin-top: 10px;
+    margin-top:10px;
 
-    font-size: 16px;
+    font-size:16px;
 
 
-    background: transparent;
+    background:transparent;
 
-    color: inherit;
+    color:inherit;
 
-    border: 1px solid #777;
+    border:1px solid #777;
+
+    border-radius:8px;
 
 }
+
 
 
 
 button {
 
-    cursor: pointer;
+    cursor:pointer;
 
-    margin-top: 20px;
+    transition:0.2s;
 
 }
+
 
 
 
 button:hover {
 
-    background: #ddd;
+    background:#ddd;
 
 }
 
 
 
-.dark button:hover {
+body.dark button:hover {
 
-    background: #333;
+    background:#333;
 
 }
 
@@ -124,31 +150,39 @@ button:hover {
 
 .imageBox {
 
-    width: 100%;
 
-    min-height: 150px;
+    width:100%;
 
-    margin-top: 15px;
+    min-height:150px;
 
-    border: 1px solid #777;
+    margin-top:15px;
 
-    display: flex;
+    border:1px solid #777;
 
-    justify-content: center;
+    border-radius:10px;
 
-    align-items: center;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    overflow:hidden;
 
 }
 
 
 
+
 .imageBox img {
 
-    max-width: 100%;
 
-    max-height: 500px;
+    max-width:100%;
 
-    object-fit: contain;
+    max-height:500px;
+
+    object-fit:contain;
 
 }
 
@@ -157,11 +191,12 @@ button:hover {
 
 progress {
 
-    width: 100%;
 
-    height: 25px;
+    width:100%;
 
-    margin-top: 15px;
+    height:25px;
+
+    margin-top:15px;
 
 }
 
@@ -170,69 +205,72 @@ progress {
 
 #status {
 
-    text-align: center;
 
-    font-size: 14px;
+    text-align:center;
 
-}
-
-
-
-
-@media (min-width:700px){
-
-
-main {
-
-    display:grid;
-
-    grid-template-columns: repeat(2,1fr);
+    font-size:14px;
 
 }
 
 
-.card:last-child {
 
-    grid-column: span 2;
-
-}
-
-
-}
 
 .console {
 
-    background: black;
-    color: white;
 
-    font-family: monospace;
+    background:#000;
 
-    padding: 15px;
+    color:#fff;
 
-    margin-top: 15px;
+    font-family:"Courier New", monospace;
 
-    border-radius: 8px;
+    padding:15px;
 
-    height: 200px;
+    margin-top:15px;
 
-    overflow-y: auto;
 
-    text-align: left;
+    border-radius:8px;
+
+    height:220px;
+
+
+    overflow-y:auto;
+
+
+    text-align:left;
+
+    font-size:14px;
+
+
+    box-shadow:0 0 10px #0003;
 
 }
 
 
-/* Inverse en mode sombre */
+
 
 body.dark .console {
 
-    background: white;
 
-    color: black;
+    background:#fff;
+
+    color:#000;
+
+    box-shadow:0 0 10px #fff3;
 
 }
 
-#compareBox{
+
+
+
+
+/* =====================
+   COMPARATEUR AVANT/APRES
+===================== */
+
+
+#compareBox {
+
 
     position:relative;
 
@@ -240,22 +278,40 @@ body.dark .console {
 
     max-width:800px;
 
+
+    margin:auto;
+
+
     overflow:hidden;
+
+    border-radius:10px;
+
 
 }
 
 
+
+
 #compareBefore,
-#compareAfter{
+#compareAfter {
+
 
     width:100%;
 
     display:block;
 
+
+    max-height:600px;
+
+    object-fit:contain;
+
 }
 
 
-#compareAfter{
+
+
+#compareAfter {
+
 
     position:absolute;
 
@@ -263,14 +319,91 @@ body.dark .console {
 
     left:0;
 
+
+    height:100%;
+
+
     clip-path:inset(
         0 50% 0 0
     );
 
 }
 
-#compareSlider{
 
-    width:100%;
+
+
+#compareSlider {
+
+
+    position:relative;
+
+    z-index:5;
+
+    margin-top:15px;
+
+
+}
+
+
+
+
+
+/* Barre du slider */
+
+#compareSlider::-webkit-slider-thumb {
+
+    cursor:pointer;
+
+}
+
+
+
+
+/* =====================
+   RESPONSIVE
+===================== */
+
+
+@media(min-width:700px){
+
+
+main {
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+}
+
+
+
+.card:last-child {
+
+    grid-column:span 2;
+
+}
+
+
+}
+
+
+
+
+@media(max-width:600px){
+
+
+body {
+
+    padding:10px;
+
+}
+
+
+h1 {
+
+    font-size:22px;
+
+}
+
 
 }
