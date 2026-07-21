@@ -8,6 +8,12 @@
 // ELEMENTS HTML
 // ================================
 
+const consoleBox =
+document.getElementById("console");
+
+const consoleButton =
+document.getElementById("consoleButton");
+
 const imageInput =
 document.getElementById("imageInput");
 
