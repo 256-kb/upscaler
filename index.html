@@ -2,11 +2,12 @@
 <html lang="fr">
 
 <head>
-
+    
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>AI Upscaler</title>
@@ -33,18 +34,19 @@ Mode
 
 <h2>Image originale</h2>
 
-<input
+<input 
 type="file"
 id="imageInput"
-accept="image/*">
+accept="image/*"
+>
 
-<img id="originalPreview">
+<img 
+id="originalPreview"
+>
 
 <p id="originalInfo"></p>
 
 </section>
-
-
 
 <section class="box">
 
@@ -100,13 +102,11 @@ Enregistrer PNG
 
 </section>
 
-
-
 <section class="box">
 
 <h2>Progression</h2>
 
-<progress
+<progress 
 id="progressBar"
 value="0"
 max="100">
@@ -120,21 +120,39 @@ Prêt
 Afficher les détails ▼
 </button>
 
-<div
-id="console"
-class="console"
-style="display:none;">
+<div id="console" class="console" style="display:none;">
 </div>
 
 </section>
-
-
 
 <section class="box">
 
 <h2>Résultat</h2>
 
-<img id="resultPreview">
+<div id="compareBox">
+
+    <img id="compareBefore">
+
+    <div id="afterContainer">
+        <img id="compareAfter">
+    </div>
+
+    <div id="compareLine"></div>
+
+</div>
+
+<input 
+type="range"
+id="compareSlider"
+min="0"
+max="100"
+value="50">
+
+</div>
+
+<img 
+id="resultPreview"
+>
 
 <p id="resultInfo"></p>
 
@@ -143,9 +161,11 @@ style="display:none;">
 </main>
 
 <!-- ONNX Runtime Web -->
+
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
 
-<!-- Application -->
+<!-- Ton application -->
+
 <script src="app.js"></script>
 
 </body>
