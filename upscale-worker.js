@@ -716,11 +716,3 @@ async function(e){
 
 
 };
-
-if(data.type==="log"){
-
-    addLog(
-        data.text
-    );
-
-}
