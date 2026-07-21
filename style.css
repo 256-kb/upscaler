@@ -271,47 +271,46 @@ body.dark .console {
 
 #compareBox {
 
-
     position:relative;
 
     width:100%;
 
     max-width:800px;
 
-
-    margin:auto;
-
+    aspect-ratio:16/9;
 
     overflow:hidden;
 
-    border-radius:10px;
+    border:2px solid #777;
 
+    border-radius:15px;
+
+    margin:auto;
 
 }
-
 
 
 
 #compareBefore,
 #compareAfter {
 
+    position:absolute;
 
     width:100%;
 
-    display:block;
-
-
-    max-height:600px;
+    height:100%;
 
     object-fit:contain;
+
+    top:0;
+
+    left:0;
 
 }
 
 
 
-
-#compareAfter {
-
+#afterContainer {
 
     position:absolute;
 
@@ -319,28 +318,53 @@ body.dark .console {
 
     left:0;
 
+    width:50%;
 
     height:100%;
 
+    overflow:hidden;
 
-    clip-path:inset(
-        0 50% 0 0
-    );
+}
+
+
+
+#compareAfter {
+
+    width:100vw;
+
+    max-width:none;
+
+}
+
+
+
+#compareLine {
+
+    position:absolute;
+
+    top:0;
+
+    bottom:0;
+
+    left:50%;
+
+    width:3px;
+
+    background:white;
+
+    z-index:5;
 
 }
 
 
 
 
+
 #compareSlider {
 
-
-    position:relative;
-
-    z-index:5;
+    width:100%;
 
     margin-top:15px;
-
 
 }
 
