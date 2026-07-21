@@ -292,15 +292,11 @@ body.dark .console {
 
     aspect-ratio:16/9;
 
-    margin:auto;
-
     overflow:hidden;
 
     border:2px solid currentColor;
 
     border-radius:12px;
-
-    background:var(--compare-bg);
 
 }
 
@@ -319,10 +315,13 @@ body.dark .console {
 
     object-fit:contain;
 
-    object-position:center center;
+    object-position:center;
+
+    user-select:none;
+
+    pointer-events:none;
 
 }
-
 
 
 #afterContainer {
