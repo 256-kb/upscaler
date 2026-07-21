@@ -1,11 +1,33 @@
 let session = null;
-let sourceImage = null;
+let originalImage = null;
 let resultURL = null;
+
+
+const MODELS = {
+
+    quality: {
+        onnx:
+        "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_quality.onnx",
+
+        data:
+        "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_quality.data"
+    },
+
+
+    speed: {
+        onnx:
+        "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_speed.onnx",
+
+        data:
+        "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_speed.data"
+    }
+
+};
+
 
 
 const imageInput = document.getElementById("imageInput");
 const originalPreview = document.getElementById("originalPreview");
-
 const resultPreview = document.getElementById("resultPreview");
 
 const originalInfo = document.getElementById("originalInfo");
@@ -24,7 +46,9 @@ const themeButton = document.getElementById("themeButton");
 
 
 
-// MODE SOMBRE
+
+
+// Mode sombre
 
 themeButton.onclick = () => {
 
@@ -36,14 +60,14 @@ themeButton.onclick = () => {
 
 
 
-// CHARGEMENT IMAGE
 
+
+// Import image
 
 imageInput.onchange = () => {
 
 
     const file = imageInput.files[0];
-
 
     if(!file) return;
 
@@ -54,21 +78,18 @@ imageInput.onchange = () => {
     originalPreview.src = url;
 
 
-    sourceImage = new Image();
+    originalImage = new Image();
+
+    originalImage.src = url;
 
 
-    sourceImage.src = url;
 
-
-
-    sourceImage.onload = () => {
-
+    originalImage.onload = () => {
 
         originalInfo.textContent =
-        `${sourceImage.width} × ${sourceImage.height} pixels`;
+        `Résolution : ${originalImage.width} × ${originalImage.height}px`;
 
     };
-
 
 };
 
@@ -77,35 +98,18 @@ imageInput.onchange = () => {
 
 
 
-// CHARGEMENT MODELE
+
+// Chargement modèle
+
+async function loadModel(type){
 
 
-async function loadModel(){
+    const model = MODELS[type];
 
 
-    let folder = modelSelect.value;
+    status.textContent =
+    "Chargement du modèle...";
 
-
-    let modelPath;
-
-
-    if(folder === "quality"){
-
-        modelPath =
-        "models/quality/real_esrgan_x4plus.onnx";
-
-    }
-
-    else {
-
-        modelPath =
-        "models/speed/real_esrgan_x4plus.onnx";
-
-    }
-
-
-
-    status.textContent = "Chargement du modèle...";
 
     progressBar.value = 10;
 
@@ -113,13 +117,27 @@ async function loadModel(){
 
     session = await ort.InferenceSession.create(
 
-        modelPath,
+        model.onnx,
 
         {
 
             executionProviders:[
+
                 "webgpu",
+
                 "wasm"
+
+            ],
+
+
+            externalData:[
+
+                {
+
+                    path:model.data
+
+                }
+
             ]
 
         }
@@ -127,11 +145,14 @@ async function loadModel(){
     );
 
 
-    progressBar.value = 30;
+
+    progressBar.value = 40;
+
+
+    console.log("Modèle chargé");
 
 
     return session;
-
 
 }
 
@@ -140,15 +161,16 @@ async function loadModel(){
 
 
 
-// LANCEMENT UPSCALE
 
+
+// Lancement
 
 runButton.onclick = async()=>{
 
 
-    if(!sourceImage){
+    if(!originalImage){
 
-        alert("Ajoute une image.");
+        alert("Choisis une image.");
 
         return;
 
@@ -156,33 +178,38 @@ runButton.onclick = async()=>{
 
 
 
-    try{
+    try {
 
 
-        await loadModel();
+        const type =
+        modelSelect.value;
+
+
+
+        await loadModel(type);
+
 
 
         status.textContent =
         "Préparation de l'image...";
 
 
-        progressBar.value = 50;
+        progressBar.value = 60;
 
 
 
         /*
-        
-        ICI :
-        - image vers tensor
-        - inference ONNX
-        - reconstruction PNG
-        
+        TODO :
+        - convertir image en tensor
+        - envoyer dans RealESRGAN
+        - récupérer sortie ONNX
+        - recréer PNG
         */
 
 
-        status.textContent =
-        "Moteur RealESRGAN à connecter";
 
+        status.textContent =
+        "Modèle chargé. Moteur image à finaliser.";
 
         progressBar.value = 100;
 
@@ -198,13 +225,10 @@ runButton.onclick = async()=>{
 
 
         status.textContent =
-        "Erreur de chargement";
+        "Erreur de chargement du modèle.";
 
 
-        alert(
-        "Impossible de charger le modèle."
-        );
-
+        alert(error);
 
     }
 
@@ -217,32 +241,35 @@ runButton.onclick = async()=>{
 
 
 
-// SAUVEGARDE
 
+
+// Sauvegarde
 
 saveButton.onclick = ()=>{
 
 
     if(!resultURL){
 
-        alert("Aucune image générée.");
+        alert("Aucune image disponible.");
 
         return;
 
     }
 
 
-    const a = document.createElement("a");
+
+    const link =
+    document.createElement("a");
 
 
-    a.href = resultURL;
+    link.href = resultURL;
 
 
-    a.download =
+    link.download =
     "upscaled.png";
 
 
-    a.click();
+    link.click();
 
 
 };
