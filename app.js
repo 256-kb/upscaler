@@ -79,6 +79,7 @@ worker = new Worker(
 
 worker.onmessage = function(e){
 
+console.log("MESSAGE WORKER :", e.data);
 
     const data =
     e.data;
