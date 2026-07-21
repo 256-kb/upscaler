@@ -193,8 +193,6 @@ async function(event){
 
 async function loadModel(){
 
-    if(isProcessing)
-        return;
 
 
     const selected =
@@ -571,9 +569,15 @@ async function upscaleImage(bitmap){
 
     if(!session){
 
-        await loadModel();
+    await loadModel();
 
-    }
+}
+
+if(!session){
+
+    throw new Error("Le modèle n'a pas été chargé");
+
+}
 
 
 
@@ -599,11 +603,9 @@ async function upscaleImage(bitmap){
 
 
 
-    const feeds = {
+    const feeds = {};
 
-        input: inputTensor
-
-    };
+feeds[session.inputNames[0]] = inputTensor;
 
 
 
@@ -696,9 +698,9 @@ async()=>{
 
 
         let resultCanvas =
-        await upscaleImage(
-            originalBitmap
-        );
+await upscaleWithTiles(
+    originalBitmap
+);
 
 
 
