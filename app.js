@@ -179,6 +179,12 @@ worker.onmessage = function(e){
     }
 
 
+        if(data.type==="log"){
+
+        addLog(data.text);
+
+}
+
 };
 // ================================
 // CHARGEMENT IMAGE
