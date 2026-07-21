@@ -339,7 +339,29 @@ async function runAI(
 
 
 
-    sendProgress(60,"Analyse des détails...");
+    sendProgress(
+60,
+"IA en cours..."
+);
+
+
+postMessage({
+type:"log",
+text:"Inference réseau neuronal démarrée..."
+});
+
+
+postMessage({
+type:"log",
+text:"Analyse des textures..."
+});
+
+
+postMessage({
+type:"log",
+text:"Reconstruction des détails..."
+});
+
     sendProgress(65,"Reconstruction des textures...");
     sendProgress(70,"Amélioration des contours...");
     sendProgress(75,"Génération haute résolution...");
