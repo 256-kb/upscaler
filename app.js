@@ -8,6 +8,9 @@
 // ELEMENTS HTML
 // ================================
 
+const compareBox =
+document.getElementById("compareBox");
+
 const compareBefore =
 document.getElementById("compareBefore");
 
@@ -124,6 +127,14 @@ URL.createObjectURL(resultBlob);
 
 compareAfter.src =
 resultURL;
+
+compareAfter.onload = () => {
+
+    compareBox.style.aspectRatio =
+    compareAfter.naturalWidth + " / " +
+    compareAfter.naturalHeight;
+
+};
 
 const endTime = performance.now();
 
@@ -251,6 +262,13 @@ async function(e){
     compareBefore.src =
     URL.createObjectURL(file);
 
+compareBefore.onload = () => {
+
+    compareBox.style.aspectRatio =
+    compareBefore.naturalWidth + " / " +
+    compareBefore.naturalHeight;
+
+};
 
     originalInfo.textContent =
     `${originalBitmap.width} × ${originalBitmap.height}px`;
