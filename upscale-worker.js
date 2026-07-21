@@ -77,13 +77,22 @@ function sendProgress(
 
     postMessage({
 
-        type:"progress",
+type:"progress",
 
-        value:value,
+value:value,
 
-        text:text
+text:text
 
-    });
+});
+
+
+postMessage({
+
+type:"log",
+
+text:text
+
+});
 
 }
 
@@ -707,3 +716,11 @@ async function(e){
 
 
 };
+
+if(data.type==="log"){
+
+    addLog(
+        data.text
+    );
+
+}
