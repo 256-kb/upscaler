@@ -231,3 +231,46 @@ body.dark .console {
     color: black;
 
 }
+
+#compareBox{
+
+    position:relative;
+
+    width:100%;
+
+    max-width:800px;
+
+    overflow:hidden;
+
+}
+
+
+#compareBefore,
+#compareAfter{
+
+    width:100%;
+
+    display:block;
+
+}
+
+
+#compareAfter{
+
+    position:absolute;
+
+    top:0;
+
+    left:0;
+
+    clip-path:inset(
+        0 50% 0 0
+    );
+
+}
+
+#compareSlider{
+
+    width:100%;
+
+}
