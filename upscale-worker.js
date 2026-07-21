@@ -155,10 +155,10 @@ async function loadModel(
 
 
 
-    sendProgress(
-        10,
-        "Préparation du modèle..."
-    );
+    sendProgress(5,"Initialisation du moteur IA...");
+    sendProgress(10,"Vérification du modèle...");
+    sendProgress(15,"Téléchargement des poids ONNX...");
+    sendProgress(20,"Chargement du réseau neuronal...");
 
 
 
@@ -186,7 +186,8 @@ async function loadModel(
     currentModel =
     modelName;
 
-
+    sendProgress(25,"Optimisation du modèle...");
+    sendProgress(30,"Modèle prêt à l'inférence.");
 
     sendProgress(
         25,
