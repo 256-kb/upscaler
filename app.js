@@ -622,6 +622,57 @@ feeds[session.inputNames[0]] = inputTensor;
     );
 
 }
+function tensorToImage(tensor){
+
+    const data = tensor.data;
+
+    const width = tensor.dims[3];
+    const height = tensor.dims[2];
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+
+    const imageData = ctx.createImageData(
+        width,
+        height
+    );
+
+    const pixels = imageData.data;
+
+    const channelSize = width * height;
+
+
+    for(let i = 0; i < channelSize; i++){
+
+        pixels[i * 4] =
+            data[i] * 255;
+
+        pixels[i * 4 + 1] =
+            data[channelSize + i] * 255;
+
+        pixels[i * 4 + 2] =
+            data[channelSize * 2 + i] * 255;
+
+        pixels[i * 4 + 3] = 255;
+
+    }
+
+
+    ctx.putImageData(
+        imageData,
+        0,
+        0
+    );
+
+
+    return canvas;
+
+}
+
 // ================================
 // PARTIE 5/8
 // LANCEMENT UPSCALE
