@@ -706,3 +706,39 @@ statusText.textContent =
 console.log(
 "AI Upscaler prêt"
 );
+
+
+
+consoleButton.onclick = ()=>{
+
+    if(consoleBox.style.display === "none"){
+
+        consoleBox.style.display="block";
+
+        consoleButton.textContent =
+        "Masquer les détails ▲";
+
+    }
+
+    else{
+
+        consoleBox.style.display="none";
+
+        consoleButton.textContent =
+        "Afficher les détails ▼";
+
+    }
+
+};
+
+
+
+function addLog(text){
+
+    consoleBox.innerHTML +=
+    "> " + text + "<br>";
+
+    consoleBox.scrollTop =
+    consoleBox.scrollHeight;
+
+}
