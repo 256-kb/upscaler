@@ -315,11 +315,10 @@ async function runAI(
 
 
 
-    sendProgress(
-        35,
-        "Préparation image..."
-    );
-
+    sendProgress(35,"Lecture de l'image...");
+    sendProgress(40,"Conversion pixels → Tensor...");
+    sendProgress(45,"Normalisation des couleurs...");
+    sendProgress(50,"Envoi vers le réseau IA...");
 
 
     const inputTensor =
@@ -340,11 +339,10 @@ async function runAI(
 
 
 
-    sendProgress(
-        60,
-        "IA en cours..."
-    );
-
+    sendProgress(60,"Analyse des détails...");
+    sendProgress(65,"Reconstruction des textures...");
+    sendProgress(70,"Amélioration des contours...");
+    sendProgress(75,"Génération haute résolution...");
 
 
     const results =
@@ -354,10 +352,8 @@ async function runAI(
 
 
 
-    sendProgress(
-        85,
-        "Reconstruction..."
-    );
+    sendProgress(85,"Conversion Tensor → Image...");
+    sendProgress(88,"Création du PNG...");
 
 
 
@@ -680,10 +676,10 @@ async function(e){
 
 
 
-        sendProgress(
-            100,
-            "Terminé"
-        );
+        sendProgress(92,"Application des réglages...");
+        sendProgress(95,"Finalisation du fichier...");
+        sendProgress(98,"Préparation du téléchargement...");
+        sendProgress(100,"Upscale terminé ✓");
 
 
 
