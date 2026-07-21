@@ -257,22 +257,21 @@ async function loadModel(){
 
 
         session =
-        await ort.InferenceSession.create(
+await ort.InferenceSession.create(
 
-            model.url,
+    model.url,
 
-            {
+    {
+        executionProviders: [
+            "wasm"
+        ],
 
-                executionProviders:
-                providers,
+        graphOptimizationLevel:
+        "all"
 
+    }
 
-                graphOptimizationLevel:
-                "all"
-
-            }
-
-        );
+);
 
 
 
