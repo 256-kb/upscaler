@@ -6,14 +6,24 @@ let session = null;
 let originalImage = null;
 
 
-
 const MODELS = {
 
-    quality:
-    "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_quality.onnx",
+    quality: {
+        onnx:
+        "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_quality.onnx",
 
-    speed:
-    "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_speed.onnx"
+        data:
+        "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_quality.data"
+    },
+
+
+    speed: {
+        onnx:
+        "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_speed.onnx",
+
+        data:
+        "https://github.com/256-kb/upscaler/releases/download/Ai/real_esrgan_x4plus_speed.data"
+    }
 
 };
 
@@ -34,7 +44,6 @@ const themeButton = document.getElementById("themeButton");
 
 
 
-
 themeButton.onclick = () => {
 
     document.body.classList.toggle("dark");
@@ -45,14 +54,11 @@ themeButton.onclick = () => {
 
 
 
-
 imageInput.onchange = () => {
-
 
     const file = imageInput.files[0];
 
-
-    if (!file) return;
+    if(!file) return;
 
 
     const url = URL.createObjectURL(file);
@@ -63,23 +69,18 @@ imageInput.onchange = () => {
 
     originalImage = new Image();
 
-
     originalImage.src = url;
 
 
 
     originalImage.onload = () => {
 
-
         originalInfo.textContent =
         `${originalImage.width} × ${originalImage.height}px`;
 
-
     };
 
-
 };
-
 
 
 
@@ -90,43 +91,78 @@ imageInput.onchange = () => {
 async function loadModel(type){
 
 
-    const url = MODELS[type];
+    const model = MODELS[type];
 
 
     status.textContent =
-    "Chargement du modèle...";
+    "Téléchargement du modèle...";
 
 
     progressBar.value = 20;
 
 
 
-    session = await ort.InferenceSession.create(
-
-        url,
-
-        {
-
-            executionProviders:[
-
-                "wasm"
-
-            ]
-
-        }
-
-    );
+    try {
 
 
+        session = await ort.InferenceSession.create(
 
-    progressBar.value = 100;
+            model.onnx,
+
+            {
+
+                executionProviders:[
+
+                    "wasm"
+
+                ],
 
 
-    status.textContent =
-    "Modèle chargé avec succès";
+                externalData:[
+
+                    {
+
+                        path: model.data
+
+                    }
+
+                ]
+
+            }
+
+        );
 
 
-    return session;
+
+        progressBar.value = 100;
+
+
+        status.textContent =
+        "Modèle chargé";
+
+
+        console.log(session);
+
+
+        return session;
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(error);
+
+
+        status.textContent =
+        "Erreur chargement modèle";
+
+
+        throw error;
+
+    }
 
 }
 
@@ -141,7 +177,7 @@ runButton.onclick = async()=>{
 
     if(!originalImage){
 
-        alert("Ajoute une image");
+        alert("Choisis une image");
 
         return;
 
@@ -158,7 +194,7 @@ runButton.onclick = async()=>{
 
 
         alert(
-        "Le modèle fonctionne !"
+        "Le modèle est chargé correctement."
         );
 
 
@@ -166,13 +202,6 @@ runButton.onclick = async()=>{
 
 
     catch(error){
-
-
-        console.error(error);
-
-
-        status.textContent =
-        "Erreur de chargement";
 
 
         alert(
