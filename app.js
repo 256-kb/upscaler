@@ -810,3 +810,16 @@ function addLog(text){
     consoleBox.scrollHeight;
 
 }
+
+if(compareSlider && compareAfter){
+
+    compareSlider.addEventListener("input", ()=>{
+
+        const value = compareSlider.value;
+
+        compareAfter.style.clipPath =
+        `inset(0 ${100 - value}% 0 0)`;
+
+    });
+
+}
