@@ -817,8 +817,24 @@ if(compareSlider && compareAfter){
 
         const value = compareSlider.value;
 
-        compareAfter.style.clipPath =
-        `inset(0 ${100 - value}% 0 0)`;
+        const afterContainer =
+document.getElementById("afterContainer");
+
+const compareLine =
+document.getElementById("compareLine");
+
+
+compareSlider.addEventListener("input", ()=>{
+
+    const value = compareSlider.value;
+
+    afterContainer.style.width =
+    value + "%";
+
+    compareLine.style.left =
+    value + "%";
+
+});
 
     });
 
