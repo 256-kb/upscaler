@@ -56,6 +56,8 @@ document.getElementById("themeButton");
 // VARIABLES
 // ================================
 
+let startTime = 0;
+
 let originalBitmap = null;
 
 let resultBlob = null;
@@ -107,6 +109,23 @@ console.log("MESSAGE WORKER :", e.data);
 
         resultBlob =
         data.image;
+
+
+
+const endTime = performance.now();
+
+const time =
+((endTime - startTime) / 1000)
+.toFixed(2);
+
+
+addLog(
+"Temps total : " + time + " secondes"
+);
+
+addLog(
+"Upscale terminé ✓"
+);
 
 
 
@@ -287,6 +306,35 @@ runButton.addEventListener(
     statusText.textContent =
     "Démarrage IA...";
 
+    startTime = performance.now();
+
+
+addLog("Démarrage de l'upscale...");
+addLog(
+"Modèle : " + modelSelect.value
+);
+
+addLog(
+"Facteur : x" + scaleSelect.value
+);
+
+addLog(
+"Résolution : " +
+originalBitmap.width +
+"x" +
+originalBitmap.height
+);
+
+addLog(
+"Pixels : " +
+(
+originalBitmap.width *
+originalBitmap.height /
+1000000
+).toFixed(2)
++
+" MP"
+);
 
 
     worker.postMessage(
