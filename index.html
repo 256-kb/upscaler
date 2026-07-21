@@ -2,23 +2,29 @@
 <html lang="fr">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Local AI Upscaler</title>
+<meta charset="UTF-8">
 
-    <link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Upscaler</title>
+
+<link rel="stylesheet" href="style.css">
+
 </head>
 
 
 <body>
 
-<header>
-    <h1>Local AI Upscaler</h1>
 
-    <button id="themeButton">
-        Mode sombre
-    </button>
+<header>
+
+<h1>AI Image Upscaler</h1>
+
+<button id="themeButton">
+Mode
+</button>
+
 </header>
 
 
@@ -26,24 +32,27 @@
 <main>
 
 
-<section class="card">
+<section class="box">
 
-<h2>Image source</h2>
+
+<h2>Image originale</h2>
+
 
 <input 
 type="file"
 id="imageInput"
-accept="image/*">
+accept="image/*"
+>
 
 
-<div class="imageBox">
-<img id="originalPreview">
-</div>
+
+<img 
+id="originalPreview"
+>
 
 
-<p id="originalInfo">
-Aucune image chargée
-</p>
+
+<p id="originalInfo"></p>
 
 
 </section>
@@ -51,58 +60,90 @@ Aucune image chargée
 
 
 
-<section class="card">
+
+<section class="box">
+
 
 <h2>Paramètres</h2>
 
 
 <label>
-Modèle
+Modèle :
 </label>
+
 
 <select id="modelSelect">
 
-<option value="quality">
-Qualité (FLOAT)
+<option value="speed">
+Vitesse - RealESR General x4v3
 </option>
 
-<option value="speed">
-Vitesse (W8A8)
+
+<option value="quality">
+Qualité - RealESRGAN x4plus
 </option>
+
 
 </select>
+
+
+
+<br><br>
 
 
 
 <label>
-Facteur d'agrandissement
+Facteur :
 </label>
+
 
 <select id="scaleSelect">
 
 <option value="2">
-×2
+x2
 </option>
+
 
 <option value="4" selected>
-×4
+x4
 </option>
 
+
 <option value="8">
-×8
+x8
 </option>
+
 
 </select>
 
 
 
+<br><br>
+
+
 <button id="runButton">
-Lancer l'upscale
+Lancer Upscale
 </button>
 
 
 
-<div class="progressContainer">
+<button id="saveButton">
+Enregistrer PNG
+</button>
+
+
+
+</section>
+
+
+
+
+
+<section class="box">
+
+
+<h2>Progression</h2>
+
 
 <progress 
 id="progressBar"
@@ -110,11 +151,11 @@ value="0"
 max="100">
 </progress>
 
+
 <p id="status">
-En attente
+Prêt
 </p>
 
-</div>
 
 
 </section>
@@ -123,27 +164,20 @@ En attente
 
 
 
-<section class="card">
+<section class="box">
+
 
 <h2>Résultat</h2>
 
 
-<div class="imageBox">
 
-<img id="resultPreview">
-
-</div>
-
-
-<p id="resultInfo">
-Aucun résultat
-</p>
+<img 
+id="resultPreview"
+>
 
 
 
-<button id="saveButton">
-Enregistrer l'image
-</button>
+<p id="resultInfo"></p>
 
 
 </section>
@@ -154,9 +188,17 @@ Enregistrer l'image
 
 
 
+
+
+<!-- ONNX Runtime Web -->
+
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
 
+
+<!-- Ton application -->
+
 <script src="app.js"></script>
+
 
 
 </body>
