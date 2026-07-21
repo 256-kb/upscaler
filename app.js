@@ -24,14 +24,14 @@ const MODELS = {
     speed: {
         name: "RealESR-General x4v3",
         url:
-        "https://github.com/256-kb/upscaler/releases/download/Ai/realesr-general-x4v3.onnx"
+        "https://huggingface.co/Intermery/Reales/resolve/main/realesr-general-x4v3.onnx"
     },
 
 
     quality: {
         name: "RealESRGAN x4plus",
         url:
-        "https://github.com/256-kb/upscaler/releases/download/Ai/realesrgan-x4plus.onnx"
+        "https://huggingface.co/Intermery/Reales/resolve/main/realesrgan-x4plus.onnx"
     }
 
 };
