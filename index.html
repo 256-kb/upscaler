@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Upscaler Local</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <h1>AI Upscaler</h1>
+    <button id="themeBtn">🌙</button>
+</header>
+
+<main>
+
+<section>
+    <h2>Image originale</h2>
+    <input type="file" id="imageInput" accept="image/*">
+
+    <img id="preview" alt="Aperçu">
+</section>
+
+
+<section>
+    <h2>Options</h2>
+
+    <label>
+        Modèle :
+        <select id="model">
+            <option value="quality">Qualité (FLOAT)</option>
+            <option value="speed">Vitesse (W8A8)</option>
+        </select>
+    </label>
+
+    <br><br>
+
+    <label>
+        Upscale :
+        <select id="scale">
+            <option value="2">×2</option>
+            <option value="4" selected>×4</option>
+            <option value="8">×8</option>
+        </select>
+    </label>
+
+    <p id="info">
+        Résolution : -
+    </p>
+
+    <button id="start">
+        Lancer l'upscale
+    </button>
+
+    <progress id="progress" value="0" max="100"></progress>
+
+</section>
+
+
+<section>
+
+<h2>Résultat</h2>
+
+<img id="result">
+
+<p id="resultInfo"></p>
+
+<button id="save">
+    Enregistrer l'image
+</button>
+
+</section>
+
+
+</main>
+
+
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
