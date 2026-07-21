@@ -238,29 +238,9 @@ async function loadModel(){
 
 
 
-        let providers = [];
-
-
-
-        // Test WebGPU
-
-        if(
-            "gpu" in navigator
-        ){
-
-            providers.push(
-                "webgpu"
-            );
-
-        }
-
-
-
-        // Toujours garder WASM en secours
-
-        providers.push(
-            "wasm"
-        );
+        let providers = [
+    "wasm"
+];
 
 
 
@@ -1388,6 +1368,8 @@ async()=>{
     const backend =
     await detectHardware();
 
+
+    await loadModel();
 
 
     statusText.textContent =
