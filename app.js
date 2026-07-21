@@ -8,6 +8,15 @@
 // ELEMENTS HTML
 // ================================
 
+const compareBefore =
+document.getElementById("compareBefore");
+
+const compareAfter =
+document.getElementById("compareAfter");
+
+const compareSlider =
+document.getElementById("compareSlider");
+
 const consoleBox =
 document.getElementById("console");
 
@@ -110,7 +119,11 @@ console.log("MESSAGE WORKER :", e.data);
         resultBlob =
         data.image;
 
+const resultURL =
+URL.createObjectURL(resultBlob);
 
+compareAfter.src =
+resultURL;
 
 const endTime = performance.now();
 
@@ -233,10 +246,10 @@ async function(e){
 
 
     originalPreview.src =
-    URL.createObjectURL(
-        file
-    );
+    URL.createObjectURL(file);
 
+    compareBefore.src =
+    URL.createObjectURL(file);
 
 
     originalInfo.textContent =
