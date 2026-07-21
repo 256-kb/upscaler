@@ -1,16 +1,18 @@
-// ================================
-// UPSCALE WORKER IA
-// ONNX Runtime Web
-// ================================
+// =================================
+// AI UPSCALER - UPSCALE WORKER
+// RealESRGAN ONNX Runtime
+// =================================
 
 
-// Chargement ONNX dans le worker
+// Chargement ONNX Runtime dans le worker
 
 importScripts(
 "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"
 );
 
 
+
+// Configuration ONNX
 
 ort.env.wasm.wasmPaths =
 "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/";
@@ -20,45 +22,65 @@ ort.env.graphOptimizationLevel = "all";
 
 
 
-// ================================
+// =================================
 // MODELES
-// ================================
+// =================================
+
 
 const MODELS = {
 
     speed: {
+
         name: "RealESR-General x4v3",
+
         url:
         "https://huggingface.co/Intermery/Reales/resolve/main/realesr-general-x4v3.onnx"
+
     },
 
 
     quality: {
+
         name: "RealESRGAN x4plus",
+
         url:
         "https://huggingface.co/Intermery/Reales/resolve/main/realesrgan-x4plus.onnx"
+
     }
 
 };
 
 
 
+
+// =================================
+// VARIABLES
+// =================================
+
+
 let session = null;
+
 let currentModel = null;
 
 
 
-// ================================
-// MESSAGES VERS APP.JS
-// ================================
+
+// =================================
+// COMMUNICATION APP.JS
+// =================================
 
 
-function progress(value,text){
+function sendProgress(
+    value,
+    text
+){
 
     postMessage({
 
         type:"progress",
+
         value:value,
+
         text:text
 
     });
@@ -68,12 +90,15 @@ function progress(value,text){
 
 
 
+
 function sendError(error){
 
     postMessage({
 
         type:"error",
-        message:error.message
+
+        message:
+        error.message || error
 
     });
 
@@ -81,12 +106,17 @@ function sendError(error){
 
 
 
-// ================================
+
+
+
+// =================================
 // CHARGEMENT MODELE
-// ================================
+// =================================
 
 
-async function loadModel(modelName){
+async function loadModel(
+    modelName
+){
 
 
     if(
@@ -100,15 +130,27 @@ async function loadModel(modelName){
 
 
 
+
     const model =
     MODELS[modelName];
 
 
 
-    progress(
+    if(!model){
+
+        throw new Error(
+            "Modèle inconnu"
+        );
+
+    }
+
+
+
+    sendProgress(
         10,
         "Préparation du modèle..."
     );
+
 
 
 
@@ -137,16 +179,16 @@ async function loadModel(modelName){
 
 
 
-    progress(
+    sendProgress(
         25,
-        "Modèle chargé"
+        "Modèle chargé : " + model.name
     );
 
 
 }
-// ================================
+// =================================
 // IMAGE -> TENSOR
-// ================================
+// =================================
 
 
 function imageToTensor(bitmap){
@@ -185,6 +227,7 @@ function imageToTensor(bitmap){
     imageData.data;
 
 
+
     const width =
     bitmap.width;
 
@@ -199,7 +242,7 @@ function imageToTensor(bitmap){
 
 
 
-    const data =
+    const tensorData =
     new Float32Array(
         size * 3
     );
@@ -212,16 +255,16 @@ function imageToTensor(bitmap){
         i++
     ){
 
-        data[i] =
-        pixels[i*4] / 255;
+        tensorData[i] =
+        pixels[i * 4] / 255;
 
 
-        data[size+i] =
-        pixels[i*4+1] / 255;
+        tensorData[size + i] =
+        pixels[i * 4 + 1] / 255;
 
 
-        data[size*2+i] =
-        pixels[i*4+2] / 255;
+        tensorData[size * 2 + i] =
+        pixels[i * 4 + 2] / 255;
 
     }
 
@@ -231,7 +274,7 @@ function imageToTensor(bitmap){
 
         "float32",
 
-        data,
+        tensorData,
 
         [
             1,
@@ -242,22 +285,98 @@ function imageToTensor(bitmap){
 
     );
 
+
 }
 
 
 
 
 
-// ================================
+
+
+// =================================
+// IA UPSCALE X4
+// =================================
+
+
+async function runAI(
+    bitmap
+){
+
+
+
+    sendProgress(
+        35,
+        "Préparation image..."
+    );
+
+
+
+    const inputTensor =
+    imageToTensor(
+        bitmap
+    );
+
+
+
+    const feeds = {};
+
+
+
+    feeds[
+        session.inputNames[0]
+    ] =
+    inputTensor;
+
+
+
+    sendProgress(
+        60,
+        "IA en cours..."
+    );
+
+
+
+    const results =
+    await session.run(
+        feeds
+    );
+
+
+
+    sendProgress(
+        85,
+        "Reconstruction..."
+    );
+
+
+
+    const output =
+    results[
+        session.outputNames[0]
+    ];
+
+
+
+    return output;
+
+
+}
+
+
+
+
+
+
+// =================================
 // TENSOR -> IMAGE
-// ================================
+// =================================
 
 
-async function tensorToBlob(tensor){
+async function tensorToBlob(
+    tensor
+){
 
-
-    const data =
-    tensor.data;
 
 
     const width =
@@ -269,6 +388,11 @@ async function tensorToBlob(tensor){
 
 
 
+    const data =
+    tensor.data;
+
+
+
     const canvas =
     new OffscreenCanvas(
         width,
@@ -276,8 +400,11 @@ async function tensorToBlob(tensor){
     );
 
 
+
     const ctx =
-    canvas.getContext("2d");
+    canvas.getContext(
+        "2d"
+    );
 
 
 
@@ -300,43 +427,45 @@ async function tensorToBlob(tensor){
 
 
     for(
-        let i=0;
-        i<size;
+        let i = 0;
+        i < size;
         i++
     ){
 
-        pixels[i*4] =
+
+        pixels[i * 4] =
         Math.max(
             0,
             Math.min(
                 255,
-                data[i]*255
+                data[i] * 255
             )
         );
 
 
-        pixels[i*4+1] =
+        pixels[i * 4 + 1] =
         Math.max(
             0,
             Math.min(
                 255,
-                data[size+i]*255
+                data[size + i] * 255
             )
         );
 
 
-        pixels[i*4+2] =
+        pixels[i * 4 + 2] =
         Math.max(
             0,
             Math.min(
                 255,
-                data[size*2+i]*255
+                data[size * 2 + i] * 255
             )
         );
 
 
-        pixels[i*4+3] =
+        pixels[i * 4 + 3] =
         255;
+
 
     }
 
@@ -350,85 +479,72 @@ async function tensorToBlob(tensor){
 
 
 
-    const blob =
-    await canvas.convertToBlob({
+    return await canvas.convertToBlob({
 
         type:"image/png"
 
     });
 
 
-
-    return blob;
-
 }
+// =================================
+// RESIZE POUR x2 / x8
+// =================================
 
 
+async function resizeBlob(
+    blob,
+    width,
+    height
+){
 
 
-
-// ================================
-// UPSCALE
-// ================================
-
-
-async function upscale(bitmap){
-
-
-    progress(
-        35,
-        "Conversion image..."
+    const bitmap =
+    await createImageBitmap(
+        blob
     );
 
 
 
-    const tensor =
-    imageToTensor(
-        bitmap
+    const canvas =
+    new OffscreenCanvas(
+        width,
+        height
     );
 
 
 
-    const feeds = {};
-
-    feeds[
-        session.inputNames[0]
-    ] =
-    tensor;
-
-
-
-    progress(
-        60,
-        "IA en cours..."
+    const ctx =
+    canvas.getContext(
+        "2d"
     );
 
 
 
-    const result =
-    await session.run(
-        feeds
+    ctx.imageSmoothingEnabled =
+    true;
+
+
+
+    ctx.drawImage(
+
+        bitmap,
+
+        0,
+        0,
+
+        width,
+        height
+
     );
 
 
 
-    progress(
-        85,
-        "Reconstruction..."
-    );
+    return await canvas.convertToBlob({
 
+        type:"image/png"
 
-
-    const output =
-    result[
-        session.outputNames[0]
-    ];
-
-
-
-    return await tensorToBlob(
-        output
-    );
+    });
 
 
 }
@@ -437,65 +553,149 @@ async function upscale(bitmap){
 
 
 
-// ================================
-// RECEPTION APP.JS
-// ================================
+// =================================
+// MESSAGE APP.JS
+// =================================
 
 
 self.onmessage =
-async function(event){
+async function(e){
 
 
     try{
 
 
         const data =
-        event.data;
+        e.data;
 
 
 
         if(
-            data.type === "start"
+            data.type !== "start"
+        )
+            return;
+
+
+
+
+        await loadModel(
+            data.model
+        );
+
+
+
+
+        // IA x4 native
+
+        const tensor =
+        await runAI(
+            data.image
+        );
+
+
+
+        let result =
+        await tensorToBlob(
+            tensor
+        );
+
+
+
+        const scale =
+        Number(
+            data.scale
+        );
+
+
+
+
+        // Adaptation x2 / x8
+
+
+        if(
+            scale === 2
         ){
 
 
-
-            await loadModel(
-                data.model
+            sendProgress(
+                90,
+                "Conversion x2..."
             );
 
 
+            result =
+            await resizeBlob(
 
-            const blob =
-            await upscale(
-                data.image
-            );
+                result,
 
+                data.image.width * 2,
 
+                data.image.height * 2
 
-            postMessage({
-
-                type:"done",
-
-                image:blob
-
-            });
-
-
-
-            progress(
-                100,
-                "Terminé"
             );
 
 
         }
 
 
+
+
+
+        if(
+            scale === 8
+        ){
+
+
+            sendProgress(
+                90,
+                "Conversion x8..."
+            );
+
+
+            result =
+            await resizeBlob(
+
+                result,
+
+                data.image.width * 8,
+
+                data.image.height * 8
+
+            );
+
+
+        }
+
+
+
+
+
+        sendProgress(
+            100,
+            "Terminé"
+        );
+
+
+
+        postMessage({
+
+            type:"done",
+
+            image:result
+
+        });
+
+
+
     }
 
 
     catch(error){
+
+
+        console.error(
+            error
+        );
 
 
         sendError(
