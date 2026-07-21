@@ -1,6 +1,11 @@
+ort.env.wasm.wasmPaths =
+"https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/";
+
+
+
 let session = null;
 let originalImage = null;
-let resultURL = null;
+
 
 
 const MODELS = {
@@ -28,16 +33,12 @@ const MODELS = {
 
 const imageInput = document.getElementById("imageInput");
 const originalPreview = document.getElementById("originalPreview");
-const resultPreview = document.getElementById("resultPreview");
 
 const originalInfo = document.getElementById("originalInfo");
-const resultInfo = document.getElementById("resultInfo");
 
 const modelSelect = document.getElementById("modelSelect");
-const scaleSelect = document.getElementById("scaleSelect");
 
 const runButton = document.getElementById("runButton");
-const saveButton = document.getElementById("saveButton");
 
 const progressBar = document.getElementById("progressBar");
 const status = document.getElementById("status");
@@ -47,8 +48,6 @@ const themeButton = document.getElementById("themeButton");
 
 
 
-
-// Mode sombre
 
 themeButton.onclick = () => {
 
@@ -62,12 +61,11 @@ themeButton.onclick = () => {
 
 
 
-// Import image
-
 imageInput.onchange = () => {
 
 
     const file = imageInput.files[0];
+
 
     if(!file) return;
 
@@ -80,6 +78,7 @@ imageInput.onchange = () => {
 
     originalImage = new Image();
 
+
     originalImage.src = url;
 
 
@@ -87,9 +86,10 @@ imageInput.onchange = () => {
     originalImage.onload = () => {
 
         originalInfo.textContent =
-        `Résolution : ${originalImage.width} × ${originalImage.height}px`;
+        `${originalImage.width} × ${originalImage.height}px`;
 
     };
+
 
 };
 
@@ -99,7 +99,6 @@ imageInput.onchange = () => {
 
 
 
-// Chargement modèle
 
 async function loadModel(type){
 
@@ -108,111 +107,58 @@ async function loadModel(type){
 
 
     status.textContent =
-    "Chargement du modèle...";
+    "Téléchargement du modèle...";
 
 
-    progressBar.value = 10;
-
-
-
-    session = await ort.InferenceSession.create(
-
-        model.onnx,
-
-        {
-
-            executionProviders:[
-
-                "webgpu",
-
-                "wasm"
-
-            ],
-
-
-            externalData:[
-
-                {
-
-                    path:model.data
-
-                }
-
-            ]
-
-        }
-
-    );
-
-
-
-    progressBar.value = 40;
-
-
-    console.log("Modèle chargé");
-
-
-    return session;
-
-}
-
-
-
-
-
-
-
-
-// Lancement
-
-runButton.onclick = async()=>{
-
-
-    if(!originalImage){
-
-        alert("Choisis une image.");
-
-        return;
-
-    }
+    progressBar.value = 20;
 
 
 
     try {
 
 
-        const type =
-        modelSelect.value;
+        session = await ort.InferenceSession.create(
+
+            model.onnx,
+
+            {
+
+                executionProviders:[
+
+                    "webgpu",
+
+                    "wasm"
+
+                ],
 
 
+                externalData:[
 
-        await loadModel(type);
+                    {
 
+                        path: model.data
 
+                    }
 
-        status.textContent =
-        "Préparation de l'image...";
+                ]
 
+            }
 
-        progressBar.value = 60;
+        );
 
-
-
-        /*
-        TODO :
-        - convertir image en tensor
-        - envoyer dans RealESRGAN
-        - récupérer sortie ONNX
-        - recréer PNG
-        */
-
-
-
-        status.textContent =
-        "Modèle chargé. Moteur image à finaliser.";
 
         progressBar.value = 100;
 
+
+        status.textContent =
+        "Modèle chargé";
+
+
+        console.log(session);
+
+
+
+        return session;
 
 
     }
@@ -225,16 +171,15 @@ runButton.onclick = async()=>{
 
 
         status.textContent =
-        "Erreur de chargement du modèle.";
+        "Erreur chargement modèle";
 
 
-        alert(error);
+        throw error;
+
 
     }
 
-
-};
-
+}
 
 
 
@@ -243,14 +188,12 @@ runButton.onclick = async()=>{
 
 
 
-// Sauvegarde
-
-saveButton.onclick = ()=>{
+runButton.onclick = async()=>{
 
 
-    if(!resultURL){
+    if(!originalImage){
 
-        alert("Aucune image disponible.");
+        alert("Ajoute une image");
 
         return;
 
@@ -258,18 +201,34 @@ saveButton.onclick = ()=>{
 
 
 
-    const link =
-    document.createElement("a");
+    try{
 
 
-    link.href = resultURL;
+        await loadModel(
+            modelSelect.value
+        );
 
 
-    link.download =
-    "upscaled.png";
+
+        alert(
+        "Le modèle est chargé correctement."
+        );
 
 
-    link.click();
+
+    }
+
+
+    catch(e){
+
+
+        alert(
+        "Erreur : " + e.message
+        );
+
+
+    }
+
 
 
 };
