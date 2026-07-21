@@ -588,7 +588,25 @@ async function(e){
             data.model
         );
 
+postMessage({
 
+type:"log",
+
+text:
+"Backend : WASM"
+
+});
+
+
+postMessage({
+
+type:"log",
+
+text:
+"Modèle chargé : " +
+MODELS[data.model].name
+
+});
 
 
         // IA x4 native
