@@ -432,3 +432,293 @@ async function upscaleTiles(bitmap){
     return canvas;
 
 }
+// ==========================================
+// CANVAS -> PNG
+// ==========================================
+
+async function canvasToBlob(canvas){
+
+    return await canvas.convertToBlob({
+
+        type:"image/png",
+
+        quality:1
+
+    });
+
+}
+
+
+
+// ==========================================
+// RESIZE FINAL x2 / x8
+// ==========================================
+
+async function resizeCanvas(
+    blob,
+    width,
+    height
+){
+
+    const bitmap =
+    await createImageBitmap(blob);
+
+
+    const canvas =
+    new OffscreenCanvas(
+        width,
+        height
+    );
+
+
+    const ctx =
+    canvas.getContext("2d");
+
+
+    ctx.imageSmoothingEnabled = true;
+
+
+    ctx.drawImage(
+
+        bitmap,
+
+        0,
+        0,
+
+        width,
+        height
+
+    );
+
+
+    return canvasToBlob(canvas);
+
+}
+
+
+
+// ==========================================
+// TRAITEMENT COMPLET
+// ==========================================
+
+async function processImage(
+    bitmap,
+    scale
+){
+
+    progress(
+        25,
+        "Début du traitement par tuiles..."
+    );
+
+
+    const canvas =
+    await upscaleTiles(bitmap);
+
+
+
+    let result =
+    await canvasToBlob(canvas);
+
+
+
+    // Le modèle fait du x4 natif
+
+    if(scale === 2){
+
+        progress(
+            90,
+            "Conversion finale x2..."
+        );
+
+
+        result =
+        await resizeCanvas(
+
+            result,
+
+            bitmap.width * 2,
+
+            bitmap.height * 2
+
+        );
+
+    }
+
+
+
+    if(scale === 8){
+
+        progress(
+            90,
+            "Conversion finale x8..."
+        );
+
+
+        result =
+        await resizeCanvas(
+
+            result,
+
+            bitmap.width * 8,
+
+            bitmap.height * 8
+
+        );
+
+    }
+
+
+    progress(
+        100,
+        "Image terminée ✓"
+    );
+
+
+    return result;
+
+}
+// ==========================================
+// COMMUNICATION AVEC APP.JS
+// ==========================================
+
+self.onmessage = async function(e){
+
+    try{
+
+        const data = e.data;
+
+
+        if(data.type !== "start")
+            return;
+
+
+
+        log("Requête reçue depuis l'interface.");
+
+        progress(
+            2,
+            "Préparation..."
+        );
+
+
+        await loadModel(
+            data.model
+        );
+
+
+        log(
+            "Modèle utilisé : " +
+            MODELS[data.model].name
+        );
+
+
+        log(
+            "Résolution originale : " +
+            data.image.width +
+            "x" +
+            data.image.height
+        );
+
+
+        const result =
+        await processImage(
+
+            data.image,
+
+            Number(data.scale)
+
+        );
+
+
+        postMessage({
+
+            type:"done",
+
+            image:result
+
+        });
+
+
+        log(
+            "Résultat envoyé à l'application."
+        );
+
+
+    }
+
+
+    catch(err){
+
+        console.error(err);
+
+
+        error(err);
+
+    }
+
+};
+// ==========================================
+// OPTIMISATIONS MEMOIRE
+// ==========================================
+
+function cleanup(){
+
+    if(session){
+
+        // Libère le cache interne ONNX si possible
+        try{
+
+            session.release();
+
+        }
+        catch(e){}
+
+    }
+
+}
+
+
+
+// ==========================================
+// INTERRUPTION PROPRE
+// ==========================================
+
+self.onmessageerror = function(e){
+
+    log(
+        "Erreur de communication worker."
+    );
+
+};
+
+
+
+// ==========================================
+// GESTION FERMETURE
+// ==========================================
+
+self.addEventListener(
+"close",
+()=>{
+
+    cleanup();
+
+});
+
+
+
+// ==========================================
+// INFO SYSTEME
+// ==========================================
+
+log(
+"Worker AI Upscaler V2 chargé."
+);
+
+log(
+"Découpage actif : " +
+TILE_SIZE +
+"x" +
+TILE_SIZE
+);
