@@ -1,14 +1,16 @@
 // ==========================================
-// AI UPSCALER WORKER V2
-// RealESRGAN + Découpage en tuiles
+// AI UPSCALER WORKER V3
+// RealESRGAN + TILES LIVE PREVIEW
 // ==========================================
+
 
 importScripts(
 "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"
 );
 
+
 // ==========================================
-// CONFIG ONNX
+// ONNX CONFIG
 // ==========================================
 
 ort.env.wasm.wasmPaths =
@@ -19,31 +21,30 @@ ort.env.graphOptimizationLevel = "all";
 ort.env.wasm.numThreads =
 navigator.hardwareConcurrency || 4;
 
+
+
 // ==========================================
-// MODELES
+// MODELS
 // ==========================================
 
 const MODELS = {
 
-    speed:{
-
-        name:"RealESR-General x4v3",
-
-        url:
+speed:{
+name:"RealESR-General x4v3",
+url:
 "https://huggingface.co/Intermery/Reales/resolve/main/realesr-general-x4v3.onnx"
+},
 
-    },
 
-    quality:{
-
-        name:"RealESRGAN x4plus",
-
-        url:
+quality:{
+name:"RealESRGAN x4plus",
+url:
 "https://huggingface.co/Intermery/Reales/resolve/main/realesrgan-x4plus.onnx"
-
-    }
+}
 
 };
+
+
 
 // ==========================================
 // VARIABLES
@@ -53,74 +54,85 @@ let session = null;
 
 let currentModel = null;
 
-// Taille d'une tuile
-// (512 fonctionne très bien sur téléphone)
 
 const TILE_SIZE = 512;
 
+
+
 // ==========================================
-// OUTILS
+// COMMUNICATION
 // ==========================================
 
-function log(text){
 
-    postMessage({
+function sendLog(text){
 
-        type:"log",
+postMessage({
 
-        text:text
+type:"log",
 
-    });
+text:text
 
-}
-
-function progress(value,text){
-
-    postMessage({
-
-        type:"progress",
-
-        value:value,
-
-        text:text
-
-    });
-
-    log(text);
+});
 
 }
 
-function error(err){
 
-    postMessage({
 
-        type:"error",
+function sendProgress(value,text){
 
-        message:err.message || err
+postMessage({
 
-    });
+type:"progress",
+
+value:value,
+
+text:text
+
+});
+
+sendLog(text);
 
 }
-
 // ==========================================
 // CHARGEMENT MODELE
 // ==========================================
 
+
 async function loadModel(modelName){
 
-    if(session && currentModel===modelName){
 
-        log("Le modèle est déjà chargé.");
+    if(
+        session &&
+        currentModel === modelName
+    ){
 
         return;
 
     }
 
-    const model = MODELS[modelName];
 
-    progress(5,"Initialisation...");
 
-    progress(10,"Téléchargement du modèle...");
+    const model =
+    MODELS[modelName];
+
+
+
+    if(!model){
+
+        throw new Error(
+            "Modèle inconnu"
+        );
+
+    }
+
+
+
+    sendProgress(
+        5,
+        "Chargement du modèle IA..."
+    );
+
+
 
     session =
     await ort.InferenceSession.create(
@@ -129,7 +141,9 @@ async function loadModel(modelName){
 
         {
 
-            executionProviders:["wasm"],
+            executionProviders:[
+                "wasm"
+            ],
 
             graphOptimizationLevel:"all"
 
@@ -137,40 +151,76 @@ async function loadModel(modelName){
 
     );
 
-    currentModel=modelName;
 
-    progress(20,"Modèle prêt.");
+
+    currentModel =
+    modelName;
+
+
+
+    sendProgress(
+        20,
+        "Modèle prêt : " + model.name
+    );
+
 
 }
+
+
+
 // ==========================================
-// IMAGE -> TENSOR
+// IMAGE DATA -> TENSOR
 // ==========================================
+
 
 function imageToTensor(imageData){
 
-    const pixels = imageData.data;
 
-    const width = imageData.width;
+    const pixels =
+    imageData.data;
 
-    const height = imageData.height;
 
-    const size = width * height;
+    const width =
+    imageData.width;
+
+
+    const height =
+    imageData.height;
+
+
+    const size =
+    width * height;
+
+
 
     const tensorData =
-    new Float32Array(size * 3);
+    new Float32Array(
+        size * 3
+    );
 
-    for(let i=0;i<size;i++){
+
+
+    for(
+        let i = 0;
+        i < size;
+        i++
+    ){
 
         tensorData[i] =
         pixels[i*4] / 255;
 
+
         tensorData[size+i] =
         pixels[i*4+1] / 255;
+
 
         tensorData[size*2+i] =
         pixels[i*4+2] / 255;
 
+
     }
+
+
 
     return new ort.Tensor(
 
@@ -178,29 +228,61 @@ function imageToTensor(imageData){
 
         tensorData,
 
-        [1,3,height,width]
+        [
+            1,
+            3,
+            height,
+            width
+        ]
 
     );
 
+
 }
 
+
+
+
 // ==========================================
-// EXTRACTION D'UNE TUILE
+// EXTRAIRE UNE TUILE
 // ==========================================
 
-function getTile(bitmap,x,y,size){
+
+function extractTile(
+    bitmap,
+    x,
+    y,
+    size
+){
+
 
     const width =
-    Math.min(size, bitmap.width-x);
+    Math.min(
+        size,
+        bitmap.width - x
+    );
+
 
     const height =
-    Math.min(size, bitmap.height-y);
+    Math.min(
+        size,
+        bitmap.height - y
+    );
+
+
 
     const canvas =
-    new OffscreenCanvas(width,height);
+    new OffscreenCanvas(
+        width,
+        height
+    );
+
+
 
     const ctx =
     canvas.getContext("2d");
+
+
 
     ctx.drawImage(
 
@@ -208,32 +290,180 @@ function getTile(bitmap,x,y,size){
 
         x,
         y,
+
         width,
         height,
 
         0,
         0,
+
         width,
         height
 
     );
+
+
 
     return ctx.getImageData(
 
         0,
         0,
+
         width,
         height
 
     );
 
+
+}
+// ==========================================
+// IA SUR UNE TUILE
+// ==========================================
+
+
+async function runTile(
+    imageData
+){
+
+
+    const tensor =
+    imageToTensor(
+        imageData
+    );
+
+
+
+    const feeds = {};
+
+
+
+    feeds[
+        session.inputNames[0]
+    ] =
+    tensor;
+
+
+
+    const results =
+    await session.run(
+        feeds
+    );
+
+
+
+    return results[
+        session.outputNames[0]
+    ];
+
+
 }
 
+
+
+
 // ==========================================
-// CREATION CANVAS FINAL
+// TENSOR -> IMAGE DATA
 // ==========================================
 
-function createResultCanvas(bitmap){
+
+function tensorToImageData(
+    tensor
+){
+
+
+    const width =
+    tensor.dims[3];
+
+
+    const height =
+    tensor.dims[2];
+
+
+    const data =
+    tensor.data;
+
+
+
+    const image =
+    new ImageData(
+        width,
+        height
+    );
+
+
+
+    const pixels =
+    image.data;
+
+
+
+    const size =
+    width * height;
+
+
+
+    for(
+        let i = 0;
+        i < size;
+        i++
+    ){
+
+
+        pixels[i*4] =
+        Math.max(
+            0,
+            Math.min(
+                255,
+                data[i] * 255
+            )
+        );
+
+
+        pixels[i*4+1] =
+        Math.max(
+            0,
+            Math.min(
+                255,
+                data[size+i] * 255
+            )
+        );
+
+
+        pixels[i*4+2] =
+        Math.max(
+            0,
+            Math.min(
+                255,
+                data[size*2+i] * 255
+            )
+        );
+
+
+        pixels[i*4+3] =
+        255;
+
+
+    }
+
+
+
+    return image;
+
+
+}
+
+
+
+
+// ==========================================
+// CREATION CANVAS RESULTAT
+// ==========================================
+
+
+function createOutputCanvas(
+    bitmap
+){
+
 
     return new OffscreenCanvas(
 
@@ -243,200 +473,240 @@ function createResultCanvas(bitmap){
 
     );
 
-}
-// ==========================================
-// IA SUR UNE TUILE
-// ==========================================
-
-async function runTile(imageData){
-
-    const tensor =
-    imageToTensor(imageData);
-
-    const feeds = {};
-
-    feeds[
-        session.inputNames[0]
-    ] = tensor;
-
-    const results =
-    await session.run(feeds);
-
-    return results[
-        session.outputNames[0]
-    ];
 
 }
 
+
+
 // ==========================================
-// UPSCALE PAR TUILES
+// ENVOI APERCU LIVE VERS APP.JS
 // ==========================================
 
-async function upscaleTiles(bitmap){
+
+async function sendPreview(
+    canvas
+){
+
+
+    const blob =
+    await canvas.convertToBlob({
+
+        type:"image/png"
+
+    });
+
+
+
+    postMessage({
+
+        type:"preview",
+
+        image:blob
+
+    });
+
+
+}
+// ==========================================
+// UPSCALE PAR TUILES LIVE
+// ==========================================
+
+
+async function upscaleTilesLive(
+    bitmap
+){
+
 
     const canvas =
-    createResultCanvas(bitmap);
+    createOutputCanvas(
+        bitmap
+    );
+
 
     const ctx =
-    canvas.getContext("2d");
+    canvas.getContext(
+        "2d"
+    );
+
+
 
     const tilesX =
-    Math.ceil(bitmap.width / TILE_SIZE);
+    Math.ceil(
+        bitmap.width / TILE_SIZE
+    );
+
 
     const tilesY =
-    Math.ceil(bitmap.height / TILE_SIZE);
+    Math.ceil(
+        bitmap.height / TILE_SIZE
+    );
+
+
 
     const total =
     tilesX * tilesY;
 
+
     let current = 0;
 
-    log(
-        "Découpage en " +
-        total +
-        " tuiles"
+
+
+    sendLog(
+        "Nombre de tuiles : " + total
     );
 
-    for(let ty=0;ty<tilesY;ty++){
 
-        for(let tx=0;tx<tilesX;tx++){
 
-            const x =
-            tx * TILE_SIZE;
+    for(
+        let y = 0;
+        y < tilesY;
+        y++
+    ){
 
-            const y =
-            ty * TILE_SIZE;
 
-            log(
-                "Tuile " +
-                (current+1) +
+        for(
+            let x = 0;
+            x < tilesX;
+            x++
+        ){
+
+
+            const posX =
+            x * TILE_SIZE;
+
+
+            const posY =
+            y * TILE_SIZE;
+
+
+
+            sendProgress(
+
+                25 +
+                Math.round(
+                    current / total * 60
+                ),
+
+                "Traitement tuile " +
+                (current + 1) +
                 "/" +
                 total
+
             );
+
+
+
+            // Extraction
 
             const tile =
-            getTile(
+            extractTile(
+
                 bitmap,
-                x,
-                y,
+
+                posX,
+
+                posY,
+
                 TILE_SIZE
+
             );
+
+
+
+            // IA
 
             const output =
-            await runTile(tile);
-
-            const outWidth =
-            output.dims[3];
-
-            const outHeight =
-            output.dims[2];
-
-            const img =
-            ctx.createImageData(
-                outWidth,
-                outHeight
+            await runTile(
+                tile
             );
 
-            const pixels =
-            img.data;
 
-            const data =
-            output.data;
 
-            const size =
-            outWidth * outHeight;
+            // Conversion image
 
-            for(let i=0;i<size;i++){
+            const image =
+            tensorToImageData(
+                output
+            );
 
-                pixels[i*4] =
-                Math.max(
-                    0,
-                    Math.min(
-                        255,
-                        data[i]*255
-                    )
-                );
 
-                pixels[i*4+1] =
-                Math.max(
-                    0,
-                    Math.min(
-                        255,
-                        data[size+i]*255
-                    )
-                );
-
-                pixels[i*4+2] =
-                Math.max(
-                    0,
-                    Math.min(
-                        255,
-                        data[size*2+i]*255
-                    )
-                );
-
-                pixels[i*4+3] =
-                255;
-
-            }
 
             const tileCanvas =
             new OffscreenCanvas(
-                outWidth,
-                outHeight
+
+                image.width,
+
+                image.height
+
             );
+
+
 
             tileCanvas
             .getContext("2d")
             .putImageData(
-                img,
+
+                image,
+
                 0,
+
                 0
+
             );
+
+
+
+            // Collage dans l'image finale
 
             ctx.drawImage(
 
                 tileCanvas,
 
-                x*4,
+                posX * 4,
 
-                y*4
+                posY * 4
 
             );
+
+
 
             current++;
 
-            progress(
 
-                20 +
-                Math.round(
-                    current /
-                    total *
-                    70
-                ),
 
-                "Tuile " +
-                current +
-                "/" +
-                total
+            // Envoi aperçu après chaque tuile
 
+            await sendPreview(
+                canvas
             );
 
-            // Libère un peu la mémoire
-            await new Promise(r=>setTimeout(r,0));
+
+
+            // Laisse le navigateur respirer
+
+            await new Promise(
+                r => setTimeout(r,0)
+            );
+
 
         }
 
     }
 
+
+
     return canvas;
+
 
 }
 // ==========================================
-// CANVAS -> PNG
+// CANVAS -> BLOB PNG
 // ==========================================
 
-async function canvasToBlob(canvas){
+
+async function canvasToBlob(
+    canvas
+){
 
     return await canvas.convertToBlob({
 
@@ -450,9 +720,11 @@ async function canvasToBlob(canvas){
 
 
 
+
 // ==========================================
-// RESIZE FINAL x2 / x8
+// RESIZE FINAL
 // ==========================================
+
 
 async function resizeCanvas(
     blob,
@@ -460,22 +732,35 @@ async function resizeCanvas(
     height
 ){
 
+
     const bitmap =
-    await createImageBitmap(blob);
+    await createImageBitmap(
+        blob
+    );
+
 
 
     const canvas =
     new OffscreenCanvas(
+
         width,
+
         height
+
     );
 
 
+
     const ctx =
-    canvas.getContext("2d");
+    canvas.getContext(
+        "2d"
+    );
 
 
-    ctx.imageSmoothingEnabled = true;
+
+    ctx.imageSmoothingEnabled =
+    true;
+
 
 
     ctx.drawImage(
@@ -483,17 +768,25 @@ async function resizeCanvas(
         bitmap,
 
         0,
+
         0,
 
         width,
+
         height
 
     );
 
 
-    return canvasToBlob(canvas);
+
+    return await canvasToBlob(
+        canvas
+    );
+
 
 }
+
+
 
 
 
@@ -501,35 +794,44 @@ async function resizeCanvas(
 // TRAITEMENT COMPLET
 // ==========================================
 
+
 async function processImage(
     bitmap,
     scale
 ){
 
-    progress(
+
+    sendProgress(
         25,
         "Début du traitement par tuiles..."
     );
 
 
+
     const canvas =
-    await upscaleTiles(bitmap);
+    await upscaleTilesLive(
+        bitmap
+    );
 
 
 
     let result =
-    await canvasToBlob(canvas);
+    await canvasToBlob(
+        canvas
+    );
 
 
 
-    // Le modèle fait du x4 natif
+    // x2
 
     if(scale === 2){
 
-        progress(
+
+        sendProgress(
             90,
             "Conversion finale x2..."
         );
+
 
 
         result =
@@ -543,16 +845,21 @@ async function processImage(
 
         );
 
+
     }
 
 
 
+    // x8
+
     if(scale === 8){
 
-        progress(
+
+        sendProgress(
             90,
             "Conversion finale x8..."
         );
+
 
 
         result =
@@ -566,27 +873,36 @@ async function processImage(
 
         );
 
+
     }
 
 
-    progress(
+
+    sendProgress(
         100,
-        "Image terminée ✓"
+        "Upscale terminé ✓"
     );
+
 
 
     return result;
 
+
 }
 // ==========================================
-// COMMUNICATION AVEC APP.JS
+// COMMUNICATION APP.JS
 // ==========================================
+
 
 self.onmessage = async function(e){
 
+
     try{
 
-        const data = e.data;
+
+        const data =
+        e.data;
+
 
 
         if(data.type !== "start")
@@ -594,12 +910,11 @@ self.onmessage = async function(e){
 
 
 
-        log("Requête reçue depuis l'interface.");
-
-        progress(
+        sendProgress(
             2,
             "Préparation..."
         );
+
 
 
         await loadModel(
@@ -607,18 +922,21 @@ self.onmessage = async function(e){
         );
 
 
-        log(
+
+        sendLog(
             "Modèle utilisé : " +
             MODELS[data.model].name
         );
 
 
-        log(
-            "Résolution originale : " +
+
+        sendLog(
+            "Image : " +
             data.image.width +
             "x" +
             data.image.height
         );
+
 
 
         const result =
@@ -626,9 +944,12 @@ self.onmessage = async function(e){
 
             data.image,
 
-            Number(data.scale)
+            Number(
+                data.scale
+            )
 
         );
+
 
 
         postMessage({
@@ -640,8 +961,9 @@ self.onmessage = async function(e){
         });
 
 
-        log(
-            "Résultat envoyé à l'application."
+
+        sendLog(
+            "Image finale envoyée."
         );
 
 
@@ -650,74 +972,40 @@ self.onmessage = async function(e){
 
     catch(err){
 
+
         console.error(err);
 
 
-        error(err);
+        postMessage({
+
+            type:"error",
+
+            message:
+            err.message || err
+
+        });
+
 
     }
 
-};
-// ==========================================
-// OPTIMISATIONS MEMOIRE
-// ==========================================
-
-function cleanup(){
-
-    if(session){
-
-        // Libère le cache interne ONNX si possible
-        try{
-
-            session.release();
-
-        }
-        catch(e){}
-
-    }
-
-}
-
-
-
-// ==========================================
-// INTERRUPTION PROPRE
-// ==========================================
-
-self.onmessageerror = function(e){
-
-    log(
-        "Erreur de communication worker."
-    );
 
 };
 
 
 
-// ==========================================
-// GESTION FERMETURE
-// ==========================================
-
-self.addEventListener(
-"close",
-()=>{
-
-    cleanup();
-
-});
-
-
 
 // ==========================================
-// INFO SYSTEME
+// INFO WORKER
 // ==========================================
 
-log(
-"Worker AI Upscaler V2 chargé."
+
+sendLog(
+"Worker V3 chargé."
 );
 
-log(
-"Découpage actif : " +
+
+sendLog(
+"Tuiles actives : " +
 TILE_SIZE +
 "x" +
 TILE_SIZE
