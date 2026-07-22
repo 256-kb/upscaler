@@ -1,13 +1,16 @@
-// ================================
+// =================================
 // AI UPSCALER - APP.JS
-// Interface principale
-// ================================
+// VERSION COMPLETE
+// PARTIE 1/5
+// =================================
 
 
-// ================================
+// =================================
 // ELEMENTS HTML
-// ================================
+// =================================
 
+
+// Comparateur (NE PAS MODIFIER)
 const compareBox =
 document.getElementById("compareBox");
 
@@ -20,55 +23,70 @@ document.getElementById("compareAfter");
 const compareSlider =
 document.getElementById("compareSlider");
 
+
+// Interface
+
 const consoleBox =
 document.getElementById("console");
 
 const consoleButton =
 document.getElementById("consoleButton");
 
+
 const imageInput =
 document.getElementById("imageInput");
+
 
 const originalPreview =
 document.getElementById("originalPreview");
 
+
 const resultPreview =
 document.getElementById("resultPreview");
+
 
 const runButton =
 document.getElementById("runButton");
 
+
 const saveButton =
 document.getElementById("saveButton");
+
 
 const modelSelect =
 document.getElementById("modelSelect");
 
+
 const scaleSelect =
 document.getElementById("scaleSelect");
+
 
 const progressBar =
 document.getElementById("progressBar");
 
+
 const statusText =
 document.getElementById("status");
+
 
 const originalInfo =
 document.getElementById("originalInfo");
 
+
 const resultInfo =
 document.getElementById("resultInfo");
+
 
 const themeButton =
 document.getElementById("themeButton");
 
 
 
-// ================================
-// VARIABLES
-// ================================
 
-let startTime = 0;
+// =================================
+// VARIABLES
+// =================================
+
 
 let originalBitmap = null;
 
@@ -78,25 +96,33 @@ let worker = null;
 
 let isProcessing = false;
 
+let startTime = 0;
 
 
-// ================================
+
+
+
+// =================================
 // CREATION WORKER
-// ================================
+// =================================
 
 
 worker = new Worker(
-"upscale-worker.js"
+    "upscale-worker.js"
 );
 
 
 
-worker.onmessage = function(e){
+worker.onmessage = (e)=>{
 
-console.log("MESSAGE WORKER :", e.data);
 
-    const data =
-    e.data;
+    const data = e.data;
+
+
+    console.log(
+        "WORKER MESSAGE :",
+        data
+    );
 
 
 
@@ -115,99 +141,23 @@ console.log("MESSAGE WORKER :", e.data);
 
 
 
-
-    if(data.type === "done"){
-
-
-        resultBlob =
-        data.image;
-
-const resultURL =
-URL.createObjectURL(resultBlob);
-
-compareAfter.src =
-resultURL;
-
-compareAfter.onload = () => {
-
-    compareBox.style.aspectRatio =
-    compareAfter.naturalWidth + " / " +
-    compareAfter.naturalHeight;
-
-};
-
-const endTime = performance.now();
-
-const time =
-((endTime - startTime) / 1000)
-.toFixed(2);
+    if(data.type === "log"){
 
 
-addLog(
-"Temps total : " + time + " secondes"
-);
-
-addLog(
-"Upscale terminé ✓"
-);
-
-
-
-        const url =
-        URL.createObjectURL(
-            resultBlob
+        addLog(
+            data.text
         );
-
-
-
-        resultPreview.src =
-        url;
-
-
-
-        const img =
-        new Image();
-
-
-        img.onload = ()=>{
-
-
-            resultInfo.textContent =
-            `${img.width} × ${img.height}px`;
-
-        };
-
-
-        img.src =
-        url;
-
-
-
-        progressBar.value =
-        100;
-
-
-        statusText.textContent =
-        "Upscale terminé";
-
-
-
-        isProcessing = false;
-
-        runButton.disabled = false;
 
 
     }
 
 
 
-
-
     if(data.type === "error"){
 
 
-        console.error(
-            data.message
+        addLog(
+            "ERREUR : " + data.message
         );
 
 
@@ -223,30 +173,26 @@ addLog(
     }
 
 
-        if(data.type==="log"){
-
-        addLog(data.text);
-
-}
 
 };
-// ================================
+// =================================
 // CHARGEMENT IMAGE
-// ================================
+// =================================
 
 
-imageInput.addEventListener(
-"change",
-async function(e){
+async function loadImage(file){
 
-
-    const file =
-    e.target.files[0];
-
-
-    if(!file)
+    if(
+        !file ||
+        !file.type.startsWith("image/")
+    )
         return;
 
+
+
+    addLog(
+        "Chargement de l'image..."
+    );
 
 
     originalBitmap =
@@ -255,20 +201,22 @@ async function(e){
     );
 
 
+    const url =
+    URL.createObjectURL(
+        file
+    );
+
 
     originalPreview.src =
-    URL.createObjectURL(file);
+    url;
+
+
+    // Comparateur gardé intact
 
     compareBefore.src =
-    URL.createObjectURL(file);
+    url;
 
-compareBefore.onload = () => {
 
-    compareBox.style.aspectRatio =
-    compareBefore.naturalWidth + " / " +
-    compareBefore.naturalHeight;
-
-};
 
     originalInfo.textContent =
     `${originalBitmap.width} × ${originalBitmap.height}px`;
@@ -282,11 +230,53 @@ compareBefore.onload = () => {
     resultBlob = null;
 
 
+
+    progressBar.value = 0;
+
+
     statusText.textContent =
     "Image chargée";
 
 
-    progressBar.value = 0;
+    addLog(
+        "Image chargée ✓"
+    );
+
+
+    addLog(
+        "Résolution : " +
+        originalBitmap.width +
+        "x" +
+        originalBitmap.height
+    );
+
+
+    addLog(
+        "Pixels : " +
+        (
+            originalBitmap.width *
+            originalBitmap.height /
+            1000000
+        ).toFixed(2)
+        +
+        " MP"
+    );
+
+}
+
+
+
+
+imageInput.addEventListener(
+"change",
+async(e)=>{
+
+
+    const file =
+    e.target.files[0];
+
+
+    await loadImage(file);
 
 
 });
@@ -294,10 +284,92 @@ compareBefore.onload = () => {
 
 
 
+// =================================
+// DRAG & DROP
+// =================================
 
-// ================================
+
+document.body.addEventListener(
+"dragover",
+(e)=>{
+
+    e.preventDefault();
+
+});
+
+
+
+
+document.body.addEventListener(
+"drop",
+async(e)=>{
+
+
+    e.preventDefault();
+
+
+
+    const file =
+    e.dataTransfer.files[0];
+
+
+
+    await loadImage(file);
+
+
+
+});
+
+
+
+
+// =================================
+// MEMOIRE
+// =================================
+
+
+function clearMemory(){
+
+
+    addLog(
+        "Nettoyage mémoire..."
+    );
+
+
+    originalBitmap = null;
+
+
+    resultBlob = null;
+
+
+
+    if(worker){
+
+
+        worker.terminate();
+
+
+    }
+
+
+}
+
+
+
+
+
+window.addEventListener(
+"beforeunload",
+()=>{
+
+
+    clearMemory();
+
+
+});
+// =================================
 // LANCEMENT UPSCALE
-// ================================
+// =================================
 
 
 runButton.addEventListener(
@@ -330,42 +402,54 @@ runButton.addEventListener(
     runButton.disabled = true;
 
 
-
     progressBar.value = 5;
 
 
     statusText.textContent =
     "Démarrage IA...";
 
-    startTime = performance.now();
 
 
-addLog("Démarrage de l'upscale...");
-addLog(
-"Modèle : " + modelSelect.value
-);
+    startTime =
+    performance.now();
 
-addLog(
-"Facteur : x" + scaleSelect.value
-);
 
-addLog(
-"Résolution : " +
-originalBitmap.width +
-"x" +
-originalBitmap.height
-);
 
-addLog(
-"Pixels : " +
-(
-originalBitmap.width *
-originalBitmap.height /
-1000000
-).toFixed(2)
-+
-" MP"
-);
+    addLog(
+        "===================="
+    );
+
+
+    addLog(
+        "Démarrage upscale"
+    );
+
+
+    addLog(
+        "Modèle : " +
+        modelSelect.value
+    );
+
+
+    addLog(
+        "Facteur : x" +
+        scaleSelect.value
+    );
+
+
+    addLog(
+        "Résolution entrée : " +
+        originalBitmap.width +
+        "x" +
+        originalBitmap.height
+    );
+
+
+
+    addLog(
+        "Préparation des tuiles..."
+    );
+
 
 
     worker.postMessage(
@@ -374,14 +458,29 @@ originalBitmap.height /
 
             type:"start",
 
+
             model:
             modelSelect.value,
 
-            image: originalBitmap,
-            scale: Number(scaleSelect.value)
+
+            image:
+            originalBitmap,
+
+
+            scale:
+            Number(
+                scaleSelect.value
+            ),
+
+
+            tileSize:
+            500
 
         },
 
+        [
+            originalBitmap
+        ]
 
     );
 
@@ -392,10 +491,116 @@ originalBitmap.height /
 
 
 
+// =================================
+// RECEPTION RESULTAT FINAL
+// =================================
 
-// ================================
+
+worker.addEventListener(
+"message",
+(e)=>{
+
+
+    const data =
+    e.data;
+
+
+
+    if(data.type === "done"){
+
+
+        resultBlob =
+        data.image;
+
+
+
+        const url =
+        URL.createObjectURL(
+            resultBlob
+        );
+
+
+
+        resultPreview.src =
+        url;
+
+
+
+        compareAfter.src =
+        url;
+
+
+
+        const img =
+        new Image();
+
+
+
+        img.onload = ()=>{
+
+
+            resultInfo.textContent =
+            `${img.width} × ${img.height}px`;
+
+
+        };
+
+
+
+        img.src =
+        url;
+
+
+
+        const time =
+        (
+            (
+                performance.now()
+                -
+                startTime
+            )
+            /
+            1000
+        ).toFixed(2);
+
+
+
+        addLog(
+            "Temps total : " +
+            time +
+            " secondes"
+        );
+
+
+        addLog(
+            "Upscale terminé ✓"
+        );
+
+
+        progressBar.value =
+        100;
+
+
+        statusText.textContent =
+        "Upscale terminé";
+
+
+
+        isProcessing = false;
+
+
+        runButton.disabled =
+        false;
+
+
+    }
+
+
+
+});
+// =================================
 // SAUVEGARDE PNG
-// ================================
+// =================================
 
 
 saveButton.addEventListener(
@@ -436,7 +641,7 @@ saveButton.addEventListener(
 
 
     link.download =
-    "upscaled_image.png";
+    "AI_upscaled_image.png";
 
 
 
@@ -456,8 +661,21 @@ saveButton.addEventListener(
 
 
     setTimeout(
-        ()=>URL.revokeObjectURL(url),
+        ()=>{
+
+            URL.revokeObjectURL(
+                url
+            );
+
+        },
+
         1000
+    );
+
+
+
+    addLog(
+        "Image sauvegardée ✓"
     );
 
 
@@ -467,21 +685,24 @@ saveButton.addEventListener(
 
 
 
-
-// ================================
-// THEME
-// ================================
+// =================================
+// THEME CLAIR / SOMBRE
+// =================================
 
 
 if(themeButton){
 
 
-themeButton.onclick =
-()=>{
+themeButton.onclick = ()=>{
 
 
     document.body.classList.toggle(
         "dark"
+    );
+
+
+    addLog(
+        "Changement de thème"
     );
 
 
@@ -494,253 +715,111 @@ themeButton.onclick =
 
 
 
-
-// ================================
-// DRAG & DROP
-// ================================
-
-
-document.body.addEventListener(
-"dragover",
-(e)=>{
+// =================================
+// CONSOLE DETAIL
+// =================================
 
 
-    e.preventDefault();
-
-
-});
-
-
-
-
-document.body.addEventListener(
-"drop",
-async(e)=>{
-
-
-    e.preventDefault();
-
-
-
-    const file =
-    e.dataTransfer.files[0];
-
+consoleButton.onclick = ()=>{
 
 
     if(
-        !file ||
-        !file.type.startsWith("image/")
-    )
-        return;
+        consoleBox.style.display
+        ===
+        "none"
+    ){
 
 
+        consoleBox.style.display =
+        "block";
 
 
-    originalBitmap =
-    await createImageBitmap(
-        file
-    );
+        consoleButton.textContent =
+        "Masquer les détails ▲";
 
 
+    }
 
-    originalPreview.src =
-    URL.createObjectURL(
-        file
-    );
+    else{
 
 
+        consoleBox.style.display =
+        "none";
 
-    originalInfo.textContent =
-    `${originalBitmap.width} × ${originalBitmap.height}px`;
 
+        consoleButton.textContent =
+        "Afficher les détails ▼";
 
-
-    statusText.textContent =
-    "Image chargée";
-
-
-});
-// ================================
-// RESIZE RESULTAT
-// ================================
-
-
-async function resizeBlob(
-    blob,
-    width,
-    height
-){
-
-
-    const bitmap =
-    await createImageBitmap(
-        blob
-    );
-
-
-
-    const canvas =
-    document.createElement(
-        "canvas"
-    );
-
-
-    canvas.width =
-    width;
-
-
-    canvas.height =
-    height;
-
-
-
-    const ctx =
-    canvas.getContext(
-        "2d"
-    );
-
-
-
-    ctx.imageSmoothingEnabled =
-    true;
-
-
-
-    ctx.drawImage(
-        bitmap,
-        0,
-        0,
-        width,
-        height
-    );
-
-
-
-    return new Promise(
-        resolve => {
-
-
-            canvas.toBlob(
-                resolve,
-                "image/png",
-                1
-            );
-
-
-        }
-    );
-
-
-}
-
-
-
-
-
-// ================================
-// GESTION SCALE x2 / x8
-// ================================
-
-
-// Note : à utiliser si tu veux garder
-// les options x2 et x8
-
-
-async function applyScale(blob){
-
-
-    const scale =
-    Number(
-        scaleSelect.value
-    );
-
-
-
-    if(scale === 4)
-        return blob;
-
-
-
-    const img =
-    await createImageBitmap(
-        blob
-    );
-
-
-
-    const originalWidth =
-    originalBitmap.width;
-
-
-    const originalHeight =
-    originalBitmap.height;
-
-
-
-    return await resizeBlob(
-
-        blob,
-
-        originalWidth * scale,
-
-        originalHeight * scale
-
-    );
-
-
-}
-
-
-
-
-
-// ================================
-// MEMOIRE
-// ================================
-
-
-function clearMemory(){
-
-
-    originalBitmap = null;
-
-
-    resultBlob = null;
-
-
-
-    if(worker){
-
-        worker.terminate();
 
     }
 
 
+};
+
+
+
+
+
+
+// =================================
+// SYSTEME DE LOGS
+// =================================
+
+
+function addLog(text){
+
+
+    if(!consoleBox)
+        return;
+
+
+
+    const line =
+    document.createElement(
+        "div"
+    );
+
+
+
+    line.textContent =
+    "> " + text;
+
+
+
+    consoleBox.appendChild(
+        line
+    );
+
+
+
+    consoleBox.scrollTop =
+    consoleBox.scrollHeight;
+
+
 }
+// =================================
+// INITIALISATION
+// =================================
+
+
+progressBar.value = 0;
+
+
+statusText.textContent =
+"Prêt - IA chargée à la demande";
+
+
+addLog(
+"AI Upscaler prêt ✓"
+);
 
 
 
 
 
-window.addEventListener(
-"beforeunload",
-()=>{
-
-
-    clearMemory();
-
-
-});
-
-
-
-
-
-
-
-// ================================
+// =================================
 // ERREURS GLOBALES
-// ================================
+// =================================
 
 
 window.addEventListener(
@@ -754,7 +833,15 @@ window.addEventListener(
     );
 
 
+    addLog(
+        "Erreur JS : " +
+        e.message
+    );
+
+
 });
+
+
 
 
 
@@ -764,7 +851,13 @@ window.addEventListener(
 
 
     console.error(
-        "Erreur promise :",
+        "Promise rejetée :",
+        e.reason
+    );
+
+
+    addLog(
+        "Erreur promise : " +
         e.reason
     );
 
@@ -776,84 +869,65 @@ window.addEventListener(
 
 
 
-// ================================
-// INITIALISATION
-// ================================
+// =================================
+// COMPARATEUR AVANT / APRES
+// NE PAS MODIFIER
+// =================================
 
 
-progressBar.value = 0;
+if(
+    compareSlider &&
+    compareAfter
+){
 
 
-statusText.textContent =
-"Prêt - IA chargée à la demande";
+    compareSlider.addEventListener(
+    "input",
+    ()=>{
 
 
-
-console.log(
-"AI Upscaler prêt"
-);
+        const value =
+        compareSlider.value;
 
 
-
-consoleButton.onclick = ()=>{
-
-    if(consoleBox.style.display === "none"){
-
-        consoleBox.style.display="block";
-
-        consoleButton.textContent =
-        "Masquer les détails ▲";
-
-    }
-
-    else{
-
-        consoleBox.style.display="none";
-
-        consoleButton.textContent =
-        "Afficher les détails ▼";
-
-    }
-
-};
-
-
-
-function addLog(text){
-
-    consoleBox.innerHTML +=
-    "> " + text + "<br>";
-
-    consoleBox.scrollTop =
-    consoleBox.scrollHeight;
-
-}
-
-if(compareSlider && compareAfter){
-
-    compareSlider.addEventListener("input", ()=>{
-
-        const value = compareSlider.value;
 
         const afterContainer =
-document.getElementById("afterContainer");
+        document.getElementById(
+            "afterContainer"
+        );
 
-const compareLine =
-document.getElementById("compareLine");
 
 
-compareSlider.addEventListener("input", ()=>{
+        const compareLine =
+        document.getElementById(
+            "compareLine"
+        );
 
-    const value = compareSlider.value;
 
-    afterContainer.style.width =
-    value + "%";
 
-    compareLine.style.left =
-    value + "%";
+        if(afterContainer){
 
-});
+
+            afterContainer.style.width =
+            value + "%";
+
+
+        }
+
+
+
+        if(compareLine){
+
+
+            compareLine.style.left =
+            value + "%";
+
+
+        }
+
+
 
     });
+
 
 }
