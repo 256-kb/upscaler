@@ -117,7 +117,26 @@ worker.onmessage = (e)=>{
 
 
     const data = e.data;
+    
 
+    if(data.type === "preview"){
+
+    const url =
+    URL.createObjectURL(
+        data.image
+    );
+    
+
+    resultPreview.src = url;
+
+    compareAfter.src = url;
+
+
+    addLog(
+        "Prévisualisation mise à jour..."
+    );
+
+}
 
     console.log(
         "WORKER MESSAGE :",
